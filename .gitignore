@@ -45,3 +45,11 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+bin/Debug/Assembly-CSharp-firstpass.dll
+*.dll
+bin/Debug/MonthlyBudgets.dll.mdb
+bin/Debug/UnityEngine.xml
+*.xml
+*.cache
+obj/Debug/MonthlyBudgets.csproj.FileListAbsolute.txt
+*.pdb

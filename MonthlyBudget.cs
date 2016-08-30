@@ -1,136 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.Text;
+using System.IO;
+using System;
 
 namespace severedsolo
 {
-    [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
+    [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class MonthlyBudgets : MonoBehaviour
     {
-        private double LastUpdate = -648000.0f;
-        int BudgetInterval = 64800;
-        int friendlyInterval = 30;
+        public double LastUpdate = 0;
+        public int BudgetInterval;
+        public int friendlyInterval = 30;
         private float Rep = 0.0f;
-        private float budget = 0.0f;
+        private double budget = 0.0f;
         private double funds = 0.0f;
-        int multiplier = 2500;
-        int AvailableWages = 5000;
-        int AssignedWages = 10000;
-        string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudget.cfg";
+        public int multiplier = 500;
+        public int AvailableWages = 5000;
+        public int AssignedWages = 10000;
+        public int VesselCost = 10000;
+        string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
+
 
         private void Budget()
         {
             try
             {
+                if(Planetarium.GetUniversalTime()<=0)
+                {
+                    return;
+                }
                 double time = (Planetarium.GetUniversalTime());
-
                 if ((time - LastUpdate) >= BudgetInterval)
                 {
                     Rep = Reputation.CurrentRep;
-
-                    budget = Rep * multiplier;
-                    budget = budget - CrewBudget();
-                    if (budget <= multiplier)
-                    {
-                        budget = multiplier;
-                    }
                     funds = Funding.Instance.Funds;
-                    Funding.Instance.AddFunds(-funds, TransactionReasons.None);
-                    Funding.Instance.AddFunds(budget, TransactionReasons.None);
-                    LastUpdate = LastUpdate + BudgetInterval;
-                    if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                    double costs = CrewBudget() - LogisticBudget();
+                    double offsetFunds = funds - costs;
+                    budget = (Rep * multiplier) - costs;
+                    if (budget <= offsetFunds)
                     {
-                        ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
+                        Funding.Instance.AddFunds(-costs, TransactionReasons.None);
+                        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                        {
+                            ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
+                            ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
+                        }
+
                     }
+                    else
+                    {
+                        Funding.Instance.AddFunds(-funds, TransactionReasons.None);
+                        Funding.Instance.AddFunds(budget, TransactionReasons.None);
+                        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                        {
+                            ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
+                        }
+                    }
+                    LastUpdate = LastUpdate + BudgetInterval;
                 }
             }
             catch
             {
             }
         }
-            
+
         void Awake()
         {
-                Load();
-                
+            DontDestroyOnLoad(this);
+            GameEvents.onGameStateSaved.Add(onGameStateSaved);
+            GameEvents.onGameStateLoad.Add(onGameStateLoad);
+
         }
 
         void Start()
         {
-           Budget();
+            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+            {
+                Destroy(this);
+            }
         }
+
         void Update()
         {
+            if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !HighLogic.LoadedSceneIsEditor)
+            {
                 Budget();
+            }
         }
+
         void OnDestroy()
         {
-            if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
-            {
-                Save();
-            }
-        }
-        private void Load()
-        {
-            if (File.Exists(SavedFile))
-            {
-
-                ConfigNode saved = ConfigNode.Load(SavedFile);
-                if (saved != null)
-                {
-                    double.TryParse(saved.GetValue("TimeElapsed (DO NOT CHANGE)"), out LastUpdate);
-                    int.TryParse(saved.GetValue("Multiplier"), out multiplier);
-                    int.TryParse(saved.GetValue("Budget Interval (Kerbin Days)"), out friendlyInterval);
-                    int.TryParse(saved.GetValue("Unassigned Kerbals wage"), out AvailableWages);
-                    int.TryParse(saved.GetValue("Assigned Kerbals wage"), out AssignedWages);
-                    Debug.Log("MonthlyBudgets: Loaded settings");
-                    if (friendlyInterval != 30)
-                    {
-                        BudgetInterval = friendlyInterval * 60 * 60 * 6;
-                    }
-                }
-                else
-                {
-                    Debug.Log("MonthlyBudgets: No save data found (this message is harmless, as long as this isn't an existing career");
-                }
-            }
-        }
-        private void Save()
-        {
-            ConfigNode savedNode = new ConfigNode("BudgetSave");
-            savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", LastUpdate);
-            savedNode.AddValue("Multiplier", multiplier);
-            savedNode.AddValue("Budget Inverval (Kerbin Days)", friendlyInterval);
-            savedNode.AddValue("Unassigned Kerbals wage", AvailableWages);
-            savedNode.AddValue("Assigned Kerbals wage", AssignedWages);
-            savedNode.Save(SavedFile);
-            Debug.Log("MonthlyBudgets: Saved game");
+            GameEvents.onGameStateSaved.Remove(onGameStateSaved);
+            GameEvents.onGameStateLoad.Remove(onGameStateLoad);
         }
 
-        private int CrewBudget()
+        public int CrewBudget()
         {
             int Budget = 0;
-            IEnumerable<CrewItemContainer> AvailableCrew = GameObject.FindObjectsOfType<CrewItemContainer>().Where(x => x.GetCrewRef().rosterStatus == ProtoCrewMember.RosterStatus.Available);
-            IEnumerable<CrewItemContainer> AssignedCrew = GameObject.FindObjectsOfType<CrewItemContainer>().Where(x => x.GetCrewRef().rosterStatus == ProtoCrewMember.RosterStatus.Assigned);
+            IEnumerable<ProtoCrewMember> AvailableCrew = HighLogic.CurrentGame.CrewRoster.Crew.Where(k => k.rosterStatus == ProtoCrewMember.RosterStatus.Available);
+            IEnumerable<ProtoCrewMember> AssignedCrew = HighLogic.CurrentGame.CrewRoster.Crew.Where(k => k.rosterStatus == ProtoCrewMember.RosterStatus.Assigned);
+
             int CrewCount = 0;
             int AvailableBudget = 0;
             int AssignedBudget = 0;
             if (AvailableCrew != null)
             {
-                
-                foreach (CrewItemContainer crew in AvailableCrew)
+
+                foreach (ProtoCrewMember crew in AvailableCrew)
                 {
                     CrewCount = CrewCount + 1;
                 }
                 AvailableBudget = CrewCount * AvailableWages;
             }
             CrewCount = 0;
-            if(AssignedCrew != null)
+            if (AssignedCrew != null)
             {
-                foreach (CrewItemContainer crew in AssignedCrew)
+                foreach (ProtoCrewMember crew in AssignedCrew)
                 {
                     CrewCount = CrewCount + 1;
                 }
@@ -140,5 +126,69 @@ namespace severedsolo
             Debug.Log("MonthlyBudgets: Crew Budget is " + Budget);
             return Budget;
         }
+        public int LogisticBudget()
+        {
+            List<Vessel> vessels = FlightGlobals.Vessels.ToList();
+            int VesselCount = 0;
+            if (vessels == null)
+            {
+                return 0;
+            }
+            foreach (Vessel v in vessels)
+            {
+                int i = v.GetCrewCount();
+                if (i > 0)
+                {
+                    VesselCount = VesselCount + 2;
+                }
+                else
+                {
+                    VesselCount = VesselCount + 1;
+                }
+            }
+            return VesselCount * VesselCost;
+        }
+
+        public void onGameStateLoad(ConfigNode data)
+        {
+            if (!HighLogic.LoadedSceneIsEditor)
+            {
+                if (File.Exists(SavedFile))
+                {
+
+                    ConfigNode node = ConfigNode.Load(SavedFile);
+                    if (node != null)
+                    {
+                        double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out LastUpdate);
+                        int.TryParse(node.GetValue("Multiplier"), out multiplier);
+                        int.TryParse(node.GetValue("Budget Interval (Kerbin Days)"), out friendlyInterval);
+                        int.TryParse(node.GetValue("Unassigned Kerbals wage"), out AvailableWages);
+                        int.TryParse(node.GetValue("Assigned Kerbals wage"), out AssignedWages);
+                        int.TryParse(node.GetValue("Base Vessel Cost"), out VesselCost);
+                        Debug.Log("MonthlyBudgets: Loaded settings");
+                    }
+                    else
+                    {
+                        Debug.Log("MonthlyBudgets: No save data found (this message is harmless, as long as this isn't an existing career");
+                    }
+                }
+                BudgetInterval = friendlyInterval * 60 * 60 * 6;
+            }
+        }
+        public void onGameStateSaved(Game data)
+        {
+            if (!HighLogic.LoadedSceneIsEditor)
+            {
+                ConfigNode savedNode = new ConfigNode();
+                savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", LastUpdate);
+                savedNode.AddValue("Multiplier", multiplier);
+                savedNode.AddValue("Budget Inverval (Kerbin Days)", friendlyInterval);
+                savedNode.AddValue("Unassigned Kerbals wage", AvailableWages);
+                savedNode.AddValue("Assigned Kerbals wage", AssignedWages);
+                savedNode.AddValue("Base Vessel Cost", VesselCost);
+                savedNode.Save(SavedFile);
+                Debug.Log("MonthlyBudgets: Saved game");
+            }
+        }
     }
-    }
+}

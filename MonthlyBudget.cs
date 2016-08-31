@@ -9,14 +9,13 @@ namespace severedsolo
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class MonthlyBudgets : MonoBehaviour
     {
-        private bool debug = false;
         private double LastUpdate = 0;
         private int BudgetInterval;
         private int friendlyInterval = 30;
         private float Rep = 0.0f;
         private double budget = 0.0f;
         private double funds = 0.0f;
-        private int multiplier = 500;
+        private int multiplier = 2227;
         private int AvailableWages = 5000;
         private int AssignedWages = 10000;
         private int VesselCost = 10000;
@@ -27,15 +26,22 @@ namespace severedsolo
         {
             try
             {
+                //get the UT
                 double time = (Planetarium.GetUniversalTime());
+                //In case the player reverts back through an update - move LastUpdate back if it's in the future.
+                if (LastUpdate > time)
+                {
+                    LastUpdate = LastUpdate - BudgetInterval;
+                }
                 if ((time - LastUpdate) >= BudgetInterval)
                 {
                     
                     Rep = Reputation.CurrentRep;
                     funds = Funding.Instance.Funds;
-                    double costs = CrewBudget() - LogisticBudget();
+                    double costs = CostCalculate();
                     double offsetFunds = funds - costs;
                     budget = (Rep * multiplier) - costs;
+                    //we shouldn't take money away. If the player holds more than the budget, just don't award.
                     if (budget <= offsetFunds)
                     {
                         Funding.Instance.AddFunds(-costs, TransactionReasons.None);
@@ -93,58 +99,27 @@ namespace severedsolo
             GameEvents.onGameStateLoad.Remove(onGameStateLoad);
         }
 
-        public int CrewBudget()
+        public int CostCalculate()
         {
             int Budget = 0;
             IEnumerable<ProtoCrewMember> AvailableCrew = HighLogic.CurrentGame.CrewRoster.Crew.Where(k => k.rosterStatus == ProtoCrewMember.RosterStatus.Available);
             IEnumerable<ProtoCrewMember> AssignedCrew = HighLogic.CurrentGame.CrewRoster.Crew.Where(k => k.rosterStatus == ProtoCrewMember.RosterStatus.Assigned);
-
-            int CrewCount = 0;
             int AvailableBudget = 0;
             int AssignedBudget = 0;
             if (AvailableCrew != null)
             {
-
-                foreach (ProtoCrewMember crew in AvailableCrew)
-                {
-                    CrewCount = CrewCount + 1;
-                }
-                AvailableBudget = CrewCount * AvailableWages;
+                AvailableBudget = AvailableCrew.Count() * AvailableWages;
             }
-            CrewCount = 0;
+
             if (AssignedCrew != null)
             {
-                foreach (ProtoCrewMember crew in AssignedCrew)
-                {
-                    CrewCount = CrewCount + 1;
-                }
-                AssignedBudget = CrewCount * AssignedWages;
+                 AssignedBudget = AssignedCrew.Count() * AssignedWages;
             }
-            Budget = AvailableBudget + AssignedBudget;
-            Debug.Log("MonthlyBudgets: Crew Budget is " + Budget);
-            return Budget;
-        }
-        public int LogisticBudget()
-        {
             List<Vessel> vessels = FlightGlobals.Vessels.ToList();
-            int VesselCount = 0;
-            if (vessels == null)
-            {
-                return 0;
-            }
-            foreach (Vessel v in vessels)
-            {
-                int i = v.GetCrewCount();
-                if (i > 0)
-                {
-                    VesselCount = VesselCount + 2;
-                }
-                else
-                {
-                    VesselCount = VesselCount + 1;
-                }
-            }
-            return VesselCount * VesselCost;
+            int VesselBudget = (vessels.Count()) * VesselCost;
+            Budget = AvailableBudget + AssignedBudget + VesselBudget;
+            Debug.Log("MonthlyBudgets: Expenses are " + Budget);
+            return Budget;
         }
 
         public void onGameStateLoad(ConfigNode ignore)

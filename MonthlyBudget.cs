@@ -26,12 +26,11 @@ namespace severedsolo
         {
             try
             {
-                //get the UT
                 double time = (Planetarium.GetUniversalTime());
-                //In case the player reverts back through an update - move LastUpdate back if it's in the future.
                 if (LastUpdate > time)
                 {
                     LastUpdate = LastUpdate - BudgetInterval;
+                    Debug.Log("MonthlyBudgets: Last update was in the future. Using time machine to correct");
                 }
                 if ((time - LastUpdate) >= BudgetInterval)
                 {
@@ -45,21 +44,17 @@ namespace severedsolo
                     if (budget <= offsetFunds)
                     {
                         Funding.Instance.AddFunds(-costs, TransactionReasons.None);
-                        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
-                        {
-                            ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
-                            ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
-                        }
-
+                        ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
+                        ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
+                        Debug.Log("MonthlyBudgets: Budget of " + budget + " is less than available funds of " + funds);
                     }
+
                     else
                     {
                         Funding.Instance.AddFunds(-funds, TransactionReasons.None);
                         Funding.Instance.AddFunds(budget, TransactionReasons.None);
-                        if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
-                        {
-                            ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
-                        }
+                        ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
+                        Debug.Log("MonthlyBudgets: Budget awarded: " + budget);
                     }
                     LastUpdate = LastUpdate + BudgetInterval;
                 }
@@ -136,10 +131,11 @@ namespace severedsolo
                         int.TryParse(node.GetValue("Unassigned Kerbals wage"), out AvailableWages);
                         int.TryParse(node.GetValue("Assigned Kerbals wage"), out AssignedWages);
                         int.TryParse(node.GetValue("Base Vessel Cost"), out VesselCost);
+                        Debug.Log("MonthlyBudgets: Loaded data");
                     }
                     else
                     {
-                        Debug.Log("MonthlyBudgets: No save data found (this message is harmless, as long as this isn't an existing career");
+                        Debug.Log("MonthlyBudgets: No existing data found for this save");
                     }
                 }
                 BudgetInterval = friendlyInterval * 60 * 60 * 6;
@@ -158,7 +154,7 @@ namespace severedsolo
                 savedNode.AddValue("Assigned Kerbals wage", AssignedWages);
                 savedNode.AddValue("Base Vessel Cost", VesselCost);
                 savedNode.Save(SavedFile);
-                Debug.Log("MonthlyBudgets: Saved game");
+                Debug.Log("MonthlyBudgets: Saved data");
             }
         }
     }

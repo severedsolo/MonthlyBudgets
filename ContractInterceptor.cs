@@ -9,7 +9,6 @@ namespace severedsolo
         public void Awake()
         {
             DontDestroyOnLoad(this);
-            GameEvents.Contract.onParameterChange.Add(onParameterChange);
             GameEvents.Contract.onOffered.Add(onOffered);
         }
 
@@ -32,12 +31,7 @@ namespace severedsolo
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;
-            Debug.Log("MonthlyBudgets: Intercepted " +contract.ToString() +" funds set to 0. An extra "+rep +" reputation has been awarded");
-        }
-
-        public void onParameterChange (Contract contract, ContractParameter parameter)
-        {
-            Funding.Instance.AddFunds(-parameter.FundsCompletion, TransactionReasons.ContractReward);
+            Debug.Log("MonthlyBudgets: Intercepted " +contract.ToString() +" and removed fund award. An extra "+rep +" reputation will be awarded instead");
         }
     }
 }

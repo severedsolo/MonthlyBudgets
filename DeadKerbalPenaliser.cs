@@ -26,7 +26,7 @@ namespace severedsolo
         public void onCrewKilled(EventReport evtdata)
         {
             Reputation.Instance.AddReputation(-50, TransactionReasons.None);
-            Debug.Log(evtdata +" died. 100 reputation removed");
+            Debug.Log("MonthlyBudgets: " +evtdata +" died. 100 reputation removed");
         }
     }
 }

@@ -9,11 +9,8 @@ namespace severedsolo
         public void Awake()
         {
             DontDestroyOnLoad(this);
-            GameEvents.Contract.onAccepted.Add(onAccepted);
-            GameEvents.Contract.onCompleted.Add(onCompleted);
-            GameEvents.Contract.onFailed.Add(onFailed);
-            GameEvents.Contract.onCancelled.Add(onCancelled);
             GameEvents.Contract.onParameterChange.Add(onParameterChange);
+            GameEvents.Contract.onOffered.Add(onOffered);
         }
 
         void Start()
@@ -26,31 +23,16 @@ namespace severedsolo
 
         public void OnDestroy()
         {
-            GameEvents.Contract.onAccepted.Remove(onAccepted);
-            GameEvents.Contract.onCompleted.Remove(onCompleted);
-            GameEvents.Contract.onFailed.Remove(onFailed);
-            GameEvents.Contract.onCancelled.Remove(onCancelled);
-            GameEvents.Contract.onParameterChange.Remove(onParameterChange);
+            GameEvents.Contract.onOffered.Remove(onOffered);
         }
 
-        public void onAccepted(Contract contract)
+        public void onOffered(Contract contract)
         {
-            Funding.Instance.AddFunds(-contract.FundsAdvance, TransactionReasons.ContractAdvance);
-        }
-
-        public void onCompleted(Contract contract)
-        {
-            Funding.Instance.AddFunds(-contract.FundsCompletion, TransactionReasons.ContractReward);
-        }
-
-        public void onFailed(Contract contract)
-        {
-            Funding.Instance.AddFunds(-contract.FundsFailure, TransactionReasons.ContractPenalty);
-        }
-
-        public void onCancelled(Contract contract)
-        {
-            Funding.Instance.AddFunds(-contract.FundsFailure, TransactionReasons.ContractPenalty);
+            int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
+            contract.ReputationCompletion = contract.ReputationCompletion + rep;
+            contract.FundsAdvance = 0;
+            contract.FundsCompletion = 0;
+            Debug.Log("MonthlyBudgets: Intercepted " +contract.ToString() +" funds set to 0. An extra "+rep +" reputation has been awarded");
         }
 
         public void onParameterChange (Contract contract, ContractParameter parameter)

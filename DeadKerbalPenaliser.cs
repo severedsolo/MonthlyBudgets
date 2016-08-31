@@ -16,16 +16,17 @@ namespace severedsolo
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
             {
                 Destroy(this);
+                Debug.Log("MonthlyBudgets: Game is not Career - Monthly Budgets will stop");
             }
         }
-
         public void OnDestroy()
         {
             GameEvents.onCrewKilled.Remove(onCrewKilled);
         }
         public void onCrewKilled(EventReport evtdata)
         {
-            Reputation.Instance.AddReputation(-100, TransactionReasons.None);
+            Reputation.Instance.AddReputation(-50, TransactionReasons.None);
+            Debug.Log(evtdata +" died. 100 reputation removed");
         }
     }
 }

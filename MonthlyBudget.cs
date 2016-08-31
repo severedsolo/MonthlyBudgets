@@ -9,16 +9,17 @@ namespace severedsolo
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class MonthlyBudgets : MonoBehaviour
     {
-        public double LastUpdate = 0;
-        public int BudgetInterval;
-        public int friendlyInterval = 30;
+        private bool debug = false;
+        private double LastUpdate = 0;
+        private int BudgetInterval;
+        private int friendlyInterval = 30;
         private float Rep = 0.0f;
         private double budget = 0.0f;
         private double funds = 0.0f;
-        public int multiplier = 500;
-        public int AvailableWages = 5000;
-        public int AssignedWages = 10000;
-        public int VesselCost = 10000;
+        private int multiplier = 500;
+        private int AvailableWages = 5000;
+        private int AssignedWages = 10000;
+        private int VesselCost = 10000;
         string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
 
 
@@ -26,13 +27,10 @@ namespace severedsolo
         {
             try
             {
-                if(Planetarium.GetUniversalTime()<=0)
-                {
-                    return;
-                }
                 double time = (Planetarium.GetUniversalTime());
                 if ((time - LastUpdate) >= BudgetInterval)
                 {
+                    
                     Rep = Reputation.CurrentRep;
                     funds = Funding.Instance.Funds;
                     double costs = CrewBudget() - LogisticBudget();
@@ -83,7 +81,7 @@ namespace severedsolo
 
         void Update()
         {
-            if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !HighLogic.LoadedSceneIsEditor)
+            if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
             {
                 Budget();
             }
@@ -149,10 +147,8 @@ namespace severedsolo
             return VesselCount * VesselCost;
         }
 
-        public void onGameStateLoad(ConfigNode data)
+        public void onGameStateLoad(ConfigNode ignore)
         {
-            if (!HighLogic.LoadedSceneIsEditor)
-            {
                 if (File.Exists(SavedFile))
                 {
 
@@ -165,7 +161,6 @@ namespace severedsolo
                         int.TryParse(node.GetValue("Unassigned Kerbals wage"), out AvailableWages);
                         int.TryParse(node.GetValue("Assigned Kerbals wage"), out AssignedWages);
                         int.TryParse(node.GetValue("Base Vessel Cost"), out VesselCost);
-                        Debug.Log("MonthlyBudgets: Loaded settings");
                     }
                     else
                     {
@@ -173,16 +168,17 @@ namespace severedsolo
                     }
                 }
                 BudgetInterval = friendlyInterval * 60 * 60 * 6;
+            Debug.Log("MonthlyBudgets: Set Interval to " + BudgetInterval +" (from "+friendlyInterval +" days)");
             }
-        }
-        public void onGameStateSaved(Game data)
+
+        public void onGameStateSaved(Game ignore)
         {
             if (!HighLogic.LoadedSceneIsEditor)
             {
                 ConfigNode savedNode = new ConfigNode();
                 savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", LastUpdate);
                 savedNode.AddValue("Multiplier", multiplier);
-                savedNode.AddValue("Budget Inverval (Kerbin Days)", friendlyInterval);
+                savedNode.AddValue("Budget Interval (Kerbin Days)", friendlyInterval);
                 savedNode.AddValue("Unassigned Kerbals wage", AvailableWages);
                 savedNode.AddValue("Assigned Kerbals wage", AssignedWages);
                 savedNode.AddValue("Base Vessel Cost", VesselCost);

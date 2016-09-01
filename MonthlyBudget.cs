@@ -19,6 +19,7 @@ namespace severedsolo
         private int AvailableWages = 5000;
         private int AssignedWages = 10000;
         private int VesselCost = 10000;
+        bool hardMode = false;
         string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
 
 
@@ -37,6 +38,12 @@ namespace severedsolo
                     
                     Rep = Reputation.CurrentRep;
                     funds = Funding.Instance.Funds;
+                    if(hardMode == true)
+                    {
+                        int penalty = (int)funds / 10000;
+                        Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+                        Debug.Log("MonthlyBudgets: " + funds + "remaining, " + penalty + " reputation removed");
+                    }
                     double costs = CostCalculate();
                     double offsetFunds = funds - costs;
                     budget = (Rep * multiplier) - costs;
@@ -131,6 +138,7 @@ namespace severedsolo
                         int.TryParse(node.GetValue("Unassigned Kerbals wage"), out AvailableWages);
                         int.TryParse(node.GetValue("Assigned Kerbals wage"), out AssignedWages);
                         int.TryParse(node.GetValue("Base Vessel Cost"), out VesselCost);
+                        bool.TryParse(node.GetValue("Hard Mode"), out hardMode);
                         Debug.Log("MonthlyBudgets: Loaded data");
                     }
                     else
@@ -153,6 +161,7 @@ namespace severedsolo
                 savedNode.AddValue("Unassigned Kerbals wage", AvailableWages);
                 savedNode.AddValue("Assigned Kerbals wage", AssignedWages);
                 savedNode.AddValue("Base Vessel Cost", VesselCost);
+                savedNode.AddValue("Hard Mode", hardMode);
                 savedNode.Save(SavedFile);
                 Debug.Log("MonthlyBudgets: Saved data");
             }

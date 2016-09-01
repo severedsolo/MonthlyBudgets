@@ -53,3 +53,5 @@ bin/Debug/UnityEngine.xml
 *.cache
 obj/Debug/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.pdb
+*.log
+bin/Debug/PartDatabase.cfg

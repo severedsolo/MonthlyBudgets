@@ -25,8 +25,9 @@ namespace severedsolo
         }
         public void onCrewKilled(EventReport evtdata)
         {
-            Reputation.Instance.AddReputation(-50, TransactionReasons.None);
-            Debug.Log("MonthlyBudgets: " +evtdata +" died. 100 reputation removed");
+            int penalty = (int)Reputation.CurrentRep / 4;
+            Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+            Debug.Log("MonthlyBudgets: A Kerbal has died. " +penalty +" reputation removed");
         }
     }
 }

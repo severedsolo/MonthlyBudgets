@@ -27,11 +27,14 @@ namespace severedsolo
 
         public void onOffered(Contract contract)
         {
-            int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
-            contract.ReputationCompletion = contract.ReputationCompletion + rep;
-            contract.FundsAdvance = 0;
-            contract.FundsCompletion = 0;
-            Debug.Log("MonthlyBudgets: Intercepted " +contract.ToString() +" and removed fund award. An extra "+rep +" reputation will be awarded instead");
+            if (contract.FundsCompletion > 0)
+            {
+                int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
+                contract.ReputationCompletion = contract.ReputationCompletion + rep;
+                contract.FundsAdvance = 0;
+                contract.FundsCompletion = 0;
+                Debug.Log("MonthlyBudgets: Intercepted " + contract.ToString() + " and removed fund award. An extra " + rep + " reputation will be awarded instead");
+            }
         }
     }
 }

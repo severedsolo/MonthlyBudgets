@@ -55,3 +55,4 @@ obj/Debug/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.pdb
 *.log
 bin/Debug/PartDatabase.cfg
+*.lastcodeanalysissucceeded

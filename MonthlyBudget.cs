@@ -16,8 +16,9 @@ namespace severedsolo
         private int AvailableWages = 5000;
         private int AssignedWages = 10000;
         private int VesselCost = 10000;
-        bool hardMode = false;
-        string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
+        private bool hardMode = false;
+        private readonly string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
+        
 
 
         private void Budget(double time)
@@ -29,7 +30,7 @@ namespace severedsolo
                     LastUpdate = LastUpdate - BudgetInterval;
                     Debug.Log("MonthlyBudgets: Last update was in the future. Using time machine to correct");
                 }
-                if ((time - LastUpdate) >= BudgetInterval)
+                else
                 {
                     double funds = Funding.Instance.Funds;
                     if(hardMode == true)

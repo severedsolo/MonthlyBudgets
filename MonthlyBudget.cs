@@ -12,9 +12,6 @@ namespace severedsolo
         private double LastUpdate = 0;
         private int BudgetInterval;
         private int friendlyInterval = 30;
-        private float Rep = 0.0f;
-        private double budget = 0.0f;
-        private double funds = 0.0f;
         private int multiplier = 2227;
         private int AvailableWages = 5000;
         private int AssignedWages = 10000;
@@ -23,11 +20,10 @@ namespace severedsolo
         string SavedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
 
 
-        private void Budget()
+        private void Budget(double time)
         {
             try
             {
-                double time = (Planetarium.GetUniversalTime());
                 if (LastUpdate > time)
                 {
                     LastUpdate = LastUpdate - BudgetInterval;
@@ -35,9 +31,7 @@ namespace severedsolo
                 }
                 if ((time - LastUpdate) >= BudgetInterval)
                 {
-                    
-                    Rep = Reputation.CurrentRep;
-                    funds = Funding.Instance.Funds;
+                    double funds = Funding.Instance.Funds;
                     if(hardMode == true)
                     {
                         int penalty = (int)funds / 10000;
@@ -46,7 +40,8 @@ namespace severedsolo
                     }
                     double costs = CostCalculate();
                     double offsetFunds = funds - costs;
-                    budget = (Rep * multiplier) - costs;
+                    float rep = Reputation.CurrentRep;
+                    double budget = (rep * multiplier) - costs;
                     //we shouldn't take money away. If the player holds more than the budget, just don't award.
                     if (budget <= offsetFunds)
                     {
@@ -91,7 +86,11 @@ namespace severedsolo
         {
             if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
             {
-                Budget();
+                double time = (Planetarium.GetUniversalTime());
+                if ((time - LastUpdate) >= BudgetInterval)
+                {
+                    Budget(time);
+                }
             }
         }
 

@@ -23,7 +23,7 @@ namespace severedsolo
         {
             GameEvents.onCrewKilled.Remove(onCrewKilled);
         }
-        public void onCrewKilled(EventReport evtdata)
+        private void onCrewKilled(EventReport evtdata)
         {
             int penalty = (int)Reputation.CurrentRep / 4;
             Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);

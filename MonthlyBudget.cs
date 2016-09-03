@@ -111,7 +111,7 @@ namespace severedsolo
             int availableBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Available)*availableWages;
             int assignedBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Assigned)* assignedWages;
             IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris);
-            int vesselBudget = (vessels.Count()) *vesselCost;
+            int vesselBudget = vessels.Count() *vesselCost;
             int budget = availableBudget + assignedBudget + vesselBudget;
             Debug.Log("MonthlyBudgets: Expenses are " + budget);
             return budget;

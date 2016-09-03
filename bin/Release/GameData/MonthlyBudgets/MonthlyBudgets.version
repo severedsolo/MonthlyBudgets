@@ -1,7 +1,7 @@
 {
-    "NAME"     : "Contract Pack: Bases and Stations",
-    "URL"      : "https://github.com/severedsolo/KerbinSpaceStation/blob/master/BasesandStations.version",
-    "DOWNLOAD" : "https://github.com/severedsolo/KerbinSpaceStation/releases",
+    "NAME"     : "Monthly Budgets",
+    "URL"      : "https://github.com/severedsolo/MonthlyBudgets/blob/master/bin/Release/GameData/MonthlyBudgets/MonthlyBudgets.version",
+    "DOWNLOAD" : "https://github.com/severedsolo/MonthlyBudgets/releases",
     "GITHUB" :
     {
         "USERNAME" : "severedsolo",
@@ -29,6 +29,7 @@
     "KSP_VERSION_MAX" :
     {
         "MAJOR" : 1,
+        "MINOR" : 1,
         "PATCH" : 3
     }
 }

@@ -57,5 +57,5 @@ obj/Debug/MonthlyBudgets.csproj.FileListAbsolute.txt
 bin/Debug/PartDatabase.cfg
 *.lastcodeanalysissucceeded
 bin/Release/PartDatabase.cfg
-*.txt
 *.zip
+bin/Release/GameData/MonthlyBudgets/MonthlyBudgetData.cfg

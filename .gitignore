@@ -59,3 +59,4 @@ bin/Debug/PartDatabase.cfg
 bin/Release/PartDatabase.cfg
 *.zip
 bin/Release/GameData/MonthlyBudgets/MonthlyBudgetData.cfg
+obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt

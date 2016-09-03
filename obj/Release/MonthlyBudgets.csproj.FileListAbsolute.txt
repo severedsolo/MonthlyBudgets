@@ -1,0 +1,17 @@
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\MonthlyBudgets.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\MonthlyBudgets.pdb
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\Assembly-CSharp.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\KSPUtil.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\UnityEngine.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\Assembly-CSharp-firstpass.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\SaveUpgradePipeline.Core.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\TrackIRUnity.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\UnityEngine.UI.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\KSPAssets.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\Mono.Cecil.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\Vectrosity.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\TDx.TDxInput.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\Mono.Security.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\UnityEngine.xml
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.dll
+d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.pdb

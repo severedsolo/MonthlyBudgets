@@ -56,3 +56,5 @@ obj/Debug/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.log
 bin/Debug/PartDatabase.cfg
 *.lastcodeanalysissucceeded
+bin/Release/PartDatabase.cfg
+*.txt

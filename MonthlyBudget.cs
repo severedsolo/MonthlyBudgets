@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Linq;
 using System.IO;
-using System;
 
 namespace severedsolo
 {
@@ -10,8 +9,8 @@ namespace severedsolo
     public class MonthlyBudgets : MonoBehaviour
     {
         private double lastUpdate;
-        private int budgetInterval;
-        private int friendlyInterval = 30;
+        private float budgetInterval;
+        private float friendlyInterval = 30;
         private int multiplier = 2227;
         private int availableWages = 5000;
         private int assignedWages = 10000;
@@ -126,7 +125,7 @@ namespace severedsolo
                 {
                     double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
                     int.TryParse(node.GetValue("Multiplier"), out multiplier);
-                    int.TryParse(node.GetValue("Budget Interval (Kerbin Days)"), out friendlyInterval);
+                    float.TryParse(node.GetValue("Budget Interval (Kerbin Days)"), out friendlyInterval);
                     int.TryParse(node.GetValue("Unassigned Kerbals wage"), out availableWages);
                     int.TryParse(node.GetValue("Assigned Kerbals wage"), out assignedWages);
                     int.TryParse(node.GetValue("Base Vessel Cost"), out vesselCost);

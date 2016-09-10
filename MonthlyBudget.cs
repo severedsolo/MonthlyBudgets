@@ -170,7 +170,7 @@ namespace severedsolo
             if (showGUI)
             {
 
-                GUILayout.Window(65468754, Window, GUIDisplay, "MonthlyBudgets", GUILayout.Width(200));
+               Window = GUILayout.Window(65468754, Window, GUIDisplay, "MonthlyBudgets", GUILayout.Width(200));
             }
         }
         public void GUIReady()
@@ -202,6 +202,7 @@ namespace severedsolo
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
+            GUI.DragWindow();
 
         }
 

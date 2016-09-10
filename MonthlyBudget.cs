@@ -108,6 +108,7 @@ namespace severedsolo
             GameEvents.onGameStateSaved.Remove(OnGameStateSaved);
             GameEvents.onGameStateLoad.Remove(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Remove(GUIReady);
+            Destroy(ToolbarButton);
         }
 
         private int CostCalculate(bool log)

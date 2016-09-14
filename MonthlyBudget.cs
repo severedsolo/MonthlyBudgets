@@ -76,6 +76,7 @@ namespace severedsolo
             GameEvents.onGameStateSaved.Add(OnGameStateSaved);
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);
+            GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
 
         }
 
@@ -108,6 +109,7 @@ namespace severedsolo
             GameEvents.onGameStateSaved.Remove(OnGameStateSaved);
             GameEvents.onGameStateLoad.Remove(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Remove(GUIReady);
+            GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
             Destroy(ToolbarButton);
         }
 
@@ -131,22 +133,13 @@ namespace severedsolo
             if (File.Exists(savedFile))
             {
                 ConfigNode node = ConfigNode.Load(savedFile);
-                if (node != null)
-                {
-                    double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
-                    int.TryParse(node.GetValue("Multiplier"), out multiplier);
-                    float.TryParse(node.GetValue("Budget Interval (Kerbin Days)"), out friendlyInterval);
-                    int.TryParse(node.GetValue("Unassigned Kerbals wage"), out availableWages);
-                    int.TryParse(node.GetValue("Assigned Kerbals wage"), out assignedWages);
-                    int.TryParse(node.GetValue("Base Vessel Cost"), out vesselCost);
-                    bool.TryParse(node.GetValue("Hard Mode"), out hardMode);
-                    Debug.Log("MonthlyBudgets: Loaded data");
-                }
+                double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
             }
-            else
-            {
-                Debug.Log("MonthlyBudgets: No existing data found for this save");
-            }
+            multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
+            friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;
+            availableWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
+            assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
+            hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             Debug.Log("MonthlyBudgets: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
@@ -156,12 +149,6 @@ namespace severedsolo
             if (HighLogic.LoadedSceneIsEditor) return;
             ConfigNode savedNode = new ConfigNode();
             savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", lastUpdate);
-            savedNode.AddValue("Multiplier", multiplier);
-            savedNode.AddValue("Budget Interval (Kerbin Days)", friendlyInterval);
-            savedNode.AddValue("Unassigned Kerbals wage", availableWages);
-            savedNode.AddValue("Assigned Kerbals wage", assignedWages);
-            savedNode.AddValue("Base Vessel Cost", vesselCost);
-            savedNode.AddValue("Hard Mode", hardMode);
             savedNode.Save(savedFile);
             Debug.Log("MonthlyBudgets: Saved data");
         }
@@ -218,6 +205,10 @@ namespace severedsolo
             {
                 showGUI = true;
             }
+        }
+        void OnGameSettingsApplied()
+        {
+            OnGameStateLoad(new ConfigNode(null, null));
         }
     }
 }

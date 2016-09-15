@@ -10,6 +10,7 @@ namespace severedsolo
         {
             DontDestroyOnLoad(this);
             GameEvents.Contract.onOffered.Add(onOffered);
+            Debug.Log("[MonthlyBudgets]: Starting Contract Interceptor");
         }
 
         void Start()
@@ -32,7 +33,7 @@ namespace severedsolo
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;
-            Debug.Log("MonthlyBudgets: Intercepted " + contract + " and removed fund award. An extra " + rep + " reputation will be awarded instead");
+            Debug.Log("[MonthlyBudgets]: Intercepted " + contract + " and removed fund award. An extra " + rep + " reputation will be awarded instead");
         }
     }
 }

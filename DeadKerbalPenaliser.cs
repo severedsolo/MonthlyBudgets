@@ -16,7 +16,7 @@ namespace severedsolo
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
             {
                 Destroy(this);
-                Debug.Log("MonthlyBudgets: Game is not Career - Monthly Budgets will stop");
+                Debug.Log("[MonthlyBudgets] Game is not Career - Monthly Budgets will stop");
             }
         }
         public void OnDestroy()
@@ -27,7 +27,7 @@ namespace severedsolo
         {
             int penalty = (int)Reputation.CurrentRep / 4;
             Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
-            Debug.Log("MonthlyBudgets: A Kerbal has died. " +penalty +" reputation removed");
+            Debug.Log("[MonthlyBudgets]: A Kerbal has died. " +penalty +" reputation removed");
         }
     }
 }

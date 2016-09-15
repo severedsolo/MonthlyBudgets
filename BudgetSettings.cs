@@ -37,13 +37,13 @@ namespace severedsolo
 
         public override void SetDifficultyPreset(GameParameters.Preset preset)
         {
-            Debug.Log("MonthlyBudgets: Setting difficulty preset");
+            Debug.Log("[MonthlyBudgets]: Setting difficulty preset");
             switch (preset)
             {
                 case GameParameters.Preset.Easy:
                     Multiplier = 5000;
                     availableWages = 1000;
-                    assignedWages = 1000;
+                    assignedWages = 5000;
                     vesselCost = 5000;
                     break;
 

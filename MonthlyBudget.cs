@@ -36,7 +36,7 @@ namespace severedsolo
                     {
                         int penalty = (int)funds / 10000;
                         Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
-                        Debug.Log("MonthlyBudgets: " + funds + "remaining, " + penalty + " reputation removed");
+                        Debug.Log("[MonthlyBudgets]: " + funds + "remaining, " + penalty + " reputation removed");
                     }
                     costs = CostCalculate(true);
                     offsetFunds = funds - costs;
@@ -52,7 +52,7 @@ namespace severedsolo
                     {
                         ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
                     }
-                    Debug.Log("MonthlyBudgets: Budget of " + budget + " is less than available funds of " + funds);
+                    Debug.Log("[MonthlyBudgets]: Budget of " + budget + " is less than available funds of " + funds);
                 }
 
                 else
@@ -60,13 +60,13 @@ namespace severedsolo
                     Funding.Instance.AddFunds(-funds, TransactionReasons.None);
                     Funding.Instance.AddFunds(budget, TransactionReasons.None);
                     ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
-                    Debug.Log("MonthlyBudgets: Budget awarded: " + budget);
+                    Debug.Log("[MonthlyBudgets]: Budget awarded: " + budget);
                 }
                 lastUpdate = lastUpdate + budgetInterval;
             }
             catch
             {
-                Debug.Log("MonthlyBudgets: Problem calculating the budget");
+                Debug.Log("[MonthlyBudgets]: Problem calculating the budget");
             }
         }
 
@@ -95,7 +95,7 @@ namespace severedsolo
             while (lastUpdate > time)
             {
                 lastUpdate = lastUpdate - budgetInterval;
-                Debug.Log("MonthlyBudgets: Last update was in the future. Using time machine to correct");
+                Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
             }
             double timeSinceLastUpdate = time - lastUpdate;
             if (timeSinceLastUpdate >= budgetInterval)
@@ -123,7 +123,7 @@ namespace severedsolo
             int budget = availableBudget + assignedBudget + vesselBudget;
             if (log)
             {
-                Debug.Log("MonthlyBudgets: Expenses are " + budget);
+                Debug.Log("[MonthlyBudgets]: Expenses are " + budget);
             }
             return budget;
         }
@@ -141,7 +141,7 @@ namespace severedsolo
             assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
-            Debug.Log("MonthlyBudgets: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
+            Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 
         private void OnGameStateSaved(Game ignore)
@@ -150,7 +150,7 @@ namespace severedsolo
             ConfigNode savedNode = new ConfigNode();
             savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", lastUpdate);
             savedNode.Save(savedFile);
-            Debug.Log("MonthlyBudgets: Saved data");
+            Debug.Log("[MonthlyBudgets]: Saved data");
         }
 
         public void OnGUI()

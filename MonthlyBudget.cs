@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Linq;
 using System.IO;
 using KSP.UI.Screens;
+using System;
 
 namespace severedsolo
 {
@@ -21,6 +22,7 @@ namespace severedsolo
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
+        float loanPercentage = 1;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -63,6 +65,7 @@ namespace severedsolo
                     Debug.Log("[MonthlyBudgets]: Budget awarded: " + budget);
                 }
                 lastUpdate = lastUpdate + budgetInterval;
+                if (loanPercentage < 1) loanPercentage = loanPercentage + 0.1f;
             }
             catch
             {
@@ -171,6 +174,11 @@ namespace severedsolo
 
         void GUIDisplay(int windowID)
         {
+        if(HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+            {
+                GUILayout.Label("MonthlyBudgets is only available in Career Games");
+                return;
+            }
          int costs = CostCalculate(false);
          int estimatedBudget = (int)Reputation.CurrentRep * multiplier;
             if(estimatedBudget <0)
@@ -190,6 +198,14 @@ namespace severedsolo
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
+            double loanAmount = Math.Round(((Reputation.CurrentRep*multiplier)/10) * loanPercentage, 0);
+            if (loanAmount <= 0) return;
+            if(GUILayout.Button("Borrow "+loanAmount +" Funds"))
+            {
+                Reputation.Instance.AddReputation(-Reputation.CurrentRep/10, TransactionReasons.None);
+                Funding.Instance.AddFunds(loanAmount, TransactionReasons.None);
+                loanPercentage = loanPercentage - 0.1f;
+            }
             GUI.DragWindow();
 
         }

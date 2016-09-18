@@ -18,7 +18,7 @@ namespace severedsolo
         private int assignedWages = 10000;
         private int vesselCost = 10000;
         private bool hardMode;
-        private readonly string savedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.cfg";
+        private readonly string savedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.dat";
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
@@ -121,7 +121,7 @@ namespace severedsolo
             IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
             int availableBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Available) * availableWages;
             int assignedBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) * assignedWages;
-            IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown);
+            IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown && v.vesselType != VesselType.EVA);
             int vesselBudget = vessels.Count() * vesselCost;
             int budget = availableBudget + assignedBudget + vesselBudget;
             if (log)
@@ -137,6 +137,7 @@ namespace severedsolo
             {
                 ConfigNode node = ConfigNode.Load(savedFile);
                 double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
+                float.TryParse(node.GetValue("Emergency Funding"), out loanPercentage);
             }
             multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
             friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;
@@ -152,6 +153,7 @@ namespace severedsolo
             if (HighLogic.LoadedSceneIsEditor) return;
             ConfigNode savedNode = new ConfigNode();
             savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", lastUpdate);
+            savedNode.AddValue("EmergencyFunding", loanPercentage);
             savedNode.Save(savedFile);
             Debug.Log("[MonthlyBudgets]: Saved data");
         }

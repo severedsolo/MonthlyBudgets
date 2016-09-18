@@ -22,7 +22,7 @@ namespace severedsolo
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
-        float loanPercentage = 1;
+        float loanPercentage = 1.0f;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -137,7 +137,7 @@ namespace severedsolo
             {
                 ConfigNode node = ConfigNode.Load(savedFile);
                 double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
-                float.TryParse(node.GetValue("Emergency Funding"), out loanPercentage);
+                float.TryParse(node.GetValue("EmergencyFunding"), out loanPercentage);
             }
             multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
             friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;

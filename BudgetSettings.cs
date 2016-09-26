@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -15,15 +16,19 @@ namespace severedsolo
             HARD,
         }
 
-        public override string Title { get { return "MonthlyBudgetOptions"; } }
+        public override string Title { get { return "Monthly Budget Options"; } }
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.CAREER; } }
-        public override string Section { get { return "MonthlyBudgets"; } }
+        public override string Section { get { return "Monthly Budgets"; } }
         public override int SectionOrder { get { return 1; } }
         public override bool HasPresets { get { return true; } }
         public bool autoPersistance = true;
         public bool newGameOnly = false;
-        [GameParameters.CustomParameterUI("Enable Hard Mode?", toolTip = "removes some reputation if you have leftover funds at the end of a budget cycle")]
+        [GameParameters.CustomParameterUI("Enable Hard Mode?", toolTip = "Removes some reputation if you have leftover funds at the end of a budget cycle")]
         public bool HardMode = false;
+        [GameParameters.CustomParameterUI("Enable Reputation Decay?", toolTip = "Repuation naturally decreases over time")]
+        public bool DecayEnabled = false;
+        [GameParameters.CustomIntParameterUI("Decay percentage", minValue = 1, maxValue = 100,toolTip = "How much to decay the repuation by each month (if Reputation Decay is switched on)")]
+        public int RepDecay = 10;
         [GameParameters.CustomIntParameterUI("Multiplier", minValue = 1, maxValue = 9999)]
         public int  Multiplier = 2227;
         [GameParameters.CustomFloatParameterUI("Budget Interval", minValue = 1, maxValue = 427)]
@@ -34,6 +39,8 @@ namespace severedsolo
         public int assignedWages = 10000;
         [GameParameters.CustomIntParameterUI("Vessel Maintenance cost", minValue = 1000, maxValue = 100000)]
         public int vesselCost = 10000;
+        
+
 
         public override void SetDifficultyPreset(GameParameters.Preset preset)
         {
@@ -59,6 +66,7 @@ namespace severedsolo
                     availableWages = 7000;
                     assignedWages = 12000;
                     vesselCost = 12000;
+                    DecayEnabled = true;
                     break;
 
                 case GameParameters.Preset.Hard:
@@ -66,6 +74,8 @@ namespace severedsolo
                     availableWages = 10000;
                     assignedWages = 20000;
                     vesselCost = 20000;
+                    DecayEnabled = true;
+                    HardMode = true;
                     break;
             }
         }

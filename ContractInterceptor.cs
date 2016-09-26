@@ -13,14 +13,6 @@ namespace severedsolo
             Debug.Log("[MonthlyBudgets]: Starting Contract Interceptor");
         }
 
-        void Start()
-        {
-            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
-            {
-                Destroy(this);
-            }
-        }
-
         public void OnDestroy()
         {
             GameEvents.Contract.onOffered.Remove(onOffered);
@@ -28,6 +20,7 @@ namespace severedsolo
 
         private void onOffered(Contract contract)
         {
+            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
             if (!(contract.FundsCompletion > 0)) return;
             int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
             contract.ReputationCompletion = contract.ReputationCompletion + rep;

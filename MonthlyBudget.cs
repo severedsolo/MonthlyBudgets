@@ -18,11 +18,13 @@ namespace severedsolo
         private int assignedWages = 10000;
         private int vesselCost = 10000;
         private bool hardMode;
+        private bool RepDecayEnabled;
         private readonly string savedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.dat";
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
         float loanPercentage = 1.0f;
+        int RepDecay = 10;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -66,6 +68,13 @@ namespace severedsolo
                 }
                 lastUpdate = lastUpdate + budgetInterval;
                 if (loanPercentage < 1) loanPercentage = loanPercentage + 0.1f;
+                if (RepDecayEnabled)
+                {
+                    Reputation.Instance.AddReputation(-Reputation.CurrentRep / RepDecay, TransactionReasons.None);
+                    Debug.Log("[MonthlyBudgets]: Removing " + RepDecay + "% Reputation");
+                }
+
+
             }
             catch
             {
@@ -80,15 +89,8 @@ namespace severedsolo
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
+            GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
 
-        }
-
-        void Start()
-        {
-            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
-            {
-                Destroy(this);
-            }
         }
 
         void Update()
@@ -113,7 +115,7 @@ namespace severedsolo
             GameEvents.onGameStateLoad.Remove(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Remove(GUIReady);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            Destroy(ToolbarButton);
+            GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
         }
 
         private int CostCalculate(bool log)
@@ -145,6 +147,8 @@ namespace severedsolo
             assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
+            RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
+            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 
@@ -168,6 +172,7 @@ namespace severedsolo
         }
         public void GUIReady()
         {
+            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER || HighLogic.LoadedScene == GameScenes.MAINMENU) return;
             if (ToolbarButton == null)
             {
                 ToolbarButton = ApplicationLauncher.Instance.AddModApplication(GUISwitch, GUISwitch, null, null, null, null, ApplicationLauncher.AppScenes.ALWAYS, GameDatabase.Instance.GetTexture("MonthlyBudgets/Icon", false));
@@ -176,7 +181,7 @@ namespace severedsolo
 
         void GUIDisplay(int windowID)
         {
-        if(HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
             {
                 GUILayout.Label("MonthlyBudgets is only available in Career Games");
                 return;
@@ -201,12 +206,16 @@ namespace severedsolo
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
             double loanAmount = Math.Round(((Reputation.CurrentRep*multiplier)/10) * loanPercentage, 0);
-            if (loanAmount <= 0) return;
-            if(GUILayout.Button("Borrow "+loanAmount +" Funds"))
+            int RepLoss = (int)Reputation.CurrentRep / 10;
+            if (loanAmount > 0)
             {
-                Reputation.Instance.AddReputation(-Reputation.CurrentRep/10, TransactionReasons.None);
-                Funding.Instance.AddFunds(loanAmount, TransactionReasons.None);
-                loanPercentage = loanPercentage - 0.1f;
+                if (GUILayout.Button("Apply for Emergency Funding ("+loanAmount+")"))
+                {
+                    Reputation.Instance.AddReputation(-RepLoss, TransactionReasons.None);
+                    Funding.Instance.AddFunds(loanAmount, TransactionReasons.None);
+                    loanPercentage = loanPercentage - 0.1f;
+                    Debug.Log("[MonthlyBudgets]: Emergency Funding Awarded");
+                }
             }
             GUI.DragWindow();
 
@@ -227,6 +236,12 @@ namespace severedsolo
         void OnGameSettingsApplied()
         {
             OnGameStateLoad(new ConfigNode(null, null));
+        }
+        void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
+        {
+            if (ToolbarButton == null) return;
+            ApplicationLauncher.Instance.RemoveModApplication(ToolbarButton);
+            showGUI = false;
         }
     }
 }

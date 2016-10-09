@@ -19,7 +19,6 @@ namespace severedsolo
         private int vesselCost = 10000;
         private bool hardMode;
         private bool RepDecayEnabled;
-        private readonly string savedFile = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/MonthlyBudgetData.dat";
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
@@ -85,7 +84,7 @@ namespace severedsolo
         void Awake()
         {
             DontDestroyOnLoad(this);
-            GameEvents.onGameStateSaved.Add(OnGameStateSaved);
+            GameEvents.onGameStateSave.Add(OnGameStateSave);
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
@@ -111,11 +110,11 @@ namespace severedsolo
 
         void OnDestroy()
         {
-            GameEvents.onGameStateSaved.Remove(OnGameStateSaved);
+            GameEvents.onGameStateSave.Remove(OnGameStateSave);
             GameEvents.onGameStateLoad.Remove(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Remove(GUIReady);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
+            GameEvents.onGameSceneSwitchRequested.Remove(onGameSceneSwitchRequested);
         }
 
         private int CostCalculate(bool log)
@@ -133,14 +132,11 @@ namespace severedsolo
             return budget;
         }
 
-        private void OnGameStateLoad(ConfigNode ignore)
+        private void OnGameStateLoad(ConfigNode node)
         {
-            if (File.Exists(savedFile))
-            {
-                ConfigNode node = ConfigNode.Load(savedFile);
-                double.TryParse(node.GetValue("TimeElapsed (DO NOT CHANGE)"), out lastUpdate);
-                float.TryParse(node.GetValue("EmergencyFunding"), out loanPercentage);
-            }
+
+            double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate);
+            if (!float.TryParse(node.GetValue("EmergencyFunding"), out loanPercentage)) loanPercentage = 1.0f;
             multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
             friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;
             availableWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
@@ -152,13 +148,11 @@ namespace severedsolo
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 
-        private void OnGameStateSaved(Game ignore)
+        private void OnGameStateSave(ConfigNode savedNode)
         {
             if (HighLogic.LoadedSceneIsEditor) return;
-            ConfigNode savedNode = new ConfigNode();
-            savedNode.AddValue("TimeElapsed (DO NOT CHANGE)", lastUpdate);
+            savedNode.AddValue("LastBudgetUpdate", lastUpdate);
             savedNode.AddValue("EmergencyFunding", loanPercentage);
-            savedNode.Save(savedFile);
             Debug.Log("[MonthlyBudgets]: Saved data");
         }
 

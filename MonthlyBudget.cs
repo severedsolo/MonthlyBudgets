@@ -22,7 +22,7 @@ namespace severedsolo
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
         float loanPercentage = 1.0f;
-        int RepDecay = 10;
+        float RepDecay = 0.1f;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -68,7 +68,7 @@ namespace severedsolo
                 if (loanPercentage < 1) loanPercentage = loanPercentage + 0.1f;
                 if (RepDecayEnabled)
                 {
-                    Reputation.Instance.AddReputation(-Reputation.CurrentRep / RepDecay, TransactionReasons.None);
+                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(1.0f-RepDecay), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + RepDecay + "% Reputation");
                 }
 
@@ -143,7 +143,7 @@ namespace severedsolo
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
-            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
+            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay/100;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace severedsolo
 {
@@ -27,6 +22,8 @@ namespace severedsolo
         public bool HardMode = false;
         [GameParameters.CustomParameterUI("Enable Reputation Decay?", toolTip = "Repuation naturally decreases over time")]
         public bool DecayEnabled = false;
+        [GameParameters.CustomParameterUI("Disable Contract Funding?", toolTip = "Converts contract funding rewards to reputation")]
+        public bool ContractInterceptor = true;
         [GameParameters.CustomIntParameterUI("Decay percentage", minValue = 1, maxValue = 100,toolTip = "How much to decay the repuation by each month (if Reputation Decay is switched on)")]
         public int RepDecay = 10;
         [GameParameters.CustomIntParameterUI("Multiplier", minValue = 1, maxValue = 9999)]

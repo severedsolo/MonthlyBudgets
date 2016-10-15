@@ -9,7 +9,7 @@ namespace severedsolo
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class MonthlyBudgets : MonoBehaviour
     {
-        public static double lastUpdate;
+        public static double lastUpdate = 99999;
         private float budgetInterval;
         private float friendlyInterval = 30;
         private int multiplier = 2227;
@@ -23,7 +23,6 @@ namespace severedsolo
         Rect Window = new Rect(20, 100, 240, 50);
         float loanPercentage = 1.0f;
         float RepDecay = 0.1f;
-
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -68,7 +67,8 @@ namespace severedsolo
                 if (loanPercentage < 1) loanPercentage = loanPercentage + 0.1f;
                 if (RepDecayEnabled)
                 {
-                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(1.0f-RepDecay), TransactionReasons.None);
+                    RepDecay = RepDecay / 100;
+                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(RepDecay), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + RepDecay + "% Reputation");
                 }
 
@@ -94,6 +94,7 @@ namespace severedsolo
         void Update()
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
+            if (lastUpdate == 99999) return;
             double time = (Planetarium.GetUniversalTime());
             while (lastUpdate > time)
             {
@@ -143,13 +144,13 @@ namespace severedsolo
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
-            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay/100;
+            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
+            if (lastUpdate == 99999) lastUpdate = 0;
         }
 
         private void OnGameStateSave(ConfigNode savedNode)
         {
-            if (HighLogic.LoadedSceneIsEditor) return;
             savedNode.AddValue("LastBudgetUpdate", lastUpdate);
             savedNode.AddValue("EmergencyFunding", loanPercentage);
             Debug.Log("[MonthlyBudgets]: Saved data");
@@ -228,7 +229,14 @@ namespace severedsolo
         }
         void OnGameSettingsApplied()
         {
-            OnGameStateLoad(new ConfigNode(null, null));
+            multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
+            friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;
+            availableWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
+            assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
+            hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
+            budgetInterval = friendlyInterval * 60 * 60 * 6;
+            RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
+            RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100;
         }
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {

@@ -2,4 +2,3 @@ d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\
 d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\bin\Release\MonthlyBudgets.pdb
 d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.dll
 d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.pdb
-d:\onedrive\documents\visual studio 2015\Projects\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.csprojResolveAssemblyReference.cache

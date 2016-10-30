@@ -23,6 +23,7 @@ namespace severedsolo
         Rect Window = new Rect(20, 100, 240, 50);
         float loanPercentage = 1.0f;
         float RepDecay = 0.1f;
+        bool timeDiscrepancyLog = true;
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -55,7 +56,6 @@ namespace severedsolo
                     }
                     Debug.Log("[MonthlyBudgets]: Budget of " + budget + " is less than available funds of " + funds);
                 }
-
                 else
                 {
                     Funding.Instance.AddFunds(-funds, TransactionReasons.None);
@@ -99,7 +99,11 @@ namespace severedsolo
             while (lastUpdate > time)
             {
                 lastUpdate = lastUpdate - budgetInterval;
-                Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
+                if (timeDiscrepancyLog)
+                {
+                    Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
+                    timeDiscrepancyLog = false;
+                }
             }
             double timeSinceLastUpdate = time - lastUpdate;
             if (timeSinceLastUpdate >= budgetInterval)
@@ -134,8 +138,6 @@ namespace severedsolo
 
         private void OnGameStateLoad(ConfigNode node)
         {
-
-            double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate);
             if (!float.TryParse(node.GetValue("EmergencyFunding"), out loanPercentage)) loanPercentage = 1.0f;
             multiplier = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
             friendlyInterval = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval;
@@ -145,8 +147,9 @@ namespace severedsolo
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
+            if (!double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate)) lastUpdate = budgetInterval * 1000;
+            timeDiscrepancyLog = true;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
-            if (lastUpdate == 99999) lastUpdate = 0;
         }
 
         private void OnGameStateSave(ConfigNode savedNode)

@@ -155,6 +155,7 @@ namespace severedsolo
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
+            vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             if (!double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate)) lastUpdate = budgetInterval * 1000;
             timeDiscrepancyLog = true;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
@@ -247,6 +248,7 @@ namespace severedsolo
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
             budgetInterval = friendlyInterval * 60 * 60 * 6;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
+            vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100;
         }
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)

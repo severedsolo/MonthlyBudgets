@@ -31,9 +31,9 @@ namespace severedsolo
         [GameParameters.CustomFloatParameterUI("Budget Interval", minValue = 1, maxValue = 427)]
         public float friendlyInterval = 30;
         [GameParameters.CustomIntParameterUI("Unassigned Kerbal Wages", minValue = 1000, maxValue = 100000)]
-        public int availableWages = 5000;
+        public int availableWages = 1000;
         [GameParameters.CustomIntParameterUI("Assigned Kerbal Wages", minValue = 1000, maxValue = 100000)]
-        public int assignedWages = 10000;
+        public int assignedWages = 2000;
         [GameParameters.CustomIntParameterUI("Vessel Maintenance cost", minValue = 1000, maxValue = 100000)]
         public int vesselCost = 10000;
         
@@ -46,30 +46,30 @@ namespace severedsolo
             {
                 case GameParameters.Preset.Easy:
                     Multiplier = 5000;
-                    availableWages = 1000;
-                    assignedWages = 5000;
+                    availableWages = 500;
+                    assignedWages = 1000;
                     vesselCost = 5000;
                     break;
 
                 case GameParameters.Preset.Normal:
                     Multiplier = 2227;
-                    availableWages = 5000;
-                    assignedWages = 10000;
+                    availableWages = 1000;
+                    assignedWages = 2000;
                     vesselCost = 10000;
                     break;
 
                 case GameParameters.Preset.Moderate:
                     Multiplier = 1000;
-                    availableWages = 7000;
-                    assignedWages = 12000;
+                    availableWages = 3500;
+                    assignedWages = 6000;
                     vesselCost = 12000;
                     DecayEnabled = true;
                     break;
 
                 case GameParameters.Preset.Hard:
                     Multiplier = 500;
-                    availableWages = 10000;
-                    assignedWages = 20000;
+                    availableWages = 5000;
+                    assignedWages = 10000;
                     vesselCost = 20000;
                     DecayEnabled = true;
                     HardMode = true;

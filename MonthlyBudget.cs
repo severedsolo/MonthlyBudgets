@@ -13,8 +13,8 @@ namespace severedsolo
         private float budgetInterval;
         private float friendlyInterval = 30;
         private int multiplier = 2227;
-        private int availableWages = 5000;
-        private int assignedWages = 10000;
+        private int availableWages = 1000;
+        private int assignedWages = 2000;
         private int vesselCost = 10000;
         private bool hardMode;
         private bool RepDecayEnabled;
@@ -124,11 +124,19 @@ namespace severedsolo
         private int CostCalculate(bool log)
         {
             IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
-            int availableBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Available) * availableWages;
-            int assignedBudget = crew.Count(a => a.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) * assignedWages;
+            int budget = 0;
+            foreach (ProtoCrewMember p in crew)
+            {
+                float level = p.experienceLevel;
+                if (level == 0) level = 0.5f;
+                float wages = 0;
+                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) wages = level * availableWages;
+                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) wages = level * assignedWages;
+                budget = budget + (int)wages;
+            }
             IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown && v.vesselType != VesselType.EVA);
             int vesselBudget = vessels.Count() * vesselCost;
-            int budget = availableBudget + assignedBudget + vesselBudget;
+            budget = budget + vesselBudget;
             if (log)
             {
                 Debug.Log("[MonthlyBudgets]: Expenses are " + budget);

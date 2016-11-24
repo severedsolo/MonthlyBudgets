@@ -67,7 +67,7 @@ namespace severedsolo
                 if (loanPercentage < 1) loanPercentage = loanPercentage + 0.1f;
                 if (RepDecayEnabled)
                 {
-                    if(RepDecay>1)RepDecay = RepDecay / 100;
+                    if(RepDecay>=1)RepDecay = RepDecay / 100;
                     Reputation.Instance.AddReputation(-Reputation.CurrentRep*(RepDecay), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + RepDecay + "% Reputation");
                 }

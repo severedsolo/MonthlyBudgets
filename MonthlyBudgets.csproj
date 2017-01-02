@@ -61,8 +61,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y "$(TargetPath)" "F:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program - 1.2.1\GameData\MonthlyBudgets"
-"F:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program - 1.2.1/KSP_X64.exe"
+    <PostBuildEvent>xcopy /Y "$(TargetPath)" "F:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program - 1.2.2\GameData\MonthlyBudgets"
+"F:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program - 1.2.2/KSP_X64.exe"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

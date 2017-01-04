@@ -18,6 +18,7 @@ namespace severedsolo
         private int vesselCost = 10000;
         private bool hardMode;
         private bool RepDecayEnabled;
+        private bool coverCosts;
         bool showGUI = false;
         ApplicationLauncherButton ToolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
@@ -30,7 +31,7 @@ namespace severedsolo
             try
             {
                 double funds = Funding.Instance.Funds;
-                double costs = 0;
+                float costs = 0;
                 double offsetFunds = funds;
                 if (budgetInterval * 2 > timeSinceLastUpdate)
                 {
@@ -48,11 +49,20 @@ namespace severedsolo
                 //we shouldn't take money away. If the player holds more than the budget, just don't award.
                 if (budget <= offsetFunds)
                 {
-                    Funding.Instance.AddFunds(-costs, TransactionReasons.None);
                     ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
-                    if (costs > 0)
+                    if (budget < costs || !coverCosts)
                     {
-                        ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
+                        if (costs > 0)
+                        {
+                            Funding.Instance.AddFunds(-costs, TransactionReasons.None);
+                            ScreenMessages.PostScreenMessage("This month's costs total " + costs.ToString("C"));
+                        }
+                    }
+                    else
+                    {
+                        ScreenMessages.PostScreenMessage("The budget will cover your costs");
+                        float repLoss = costs / multiplier;
+                        Reputation.Instance.AddReputation(-repLoss, TransactionReasons.None);
                     }
                     Debug.Log("[MonthlyBudgets]: Budget of " + budget + " is less than available funds of " + funds);
                 }
@@ -158,6 +168,7 @@ namespace severedsolo
             vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             if (!double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate)) lastUpdate = budgetInterval * 1000;
             timeDiscrepancyLog = true;
+            coverCosts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().coverCosts;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 
@@ -250,6 +261,7 @@ namespace severedsolo
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
             vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100;
+            coverCosts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().coverCosts;
         }
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {

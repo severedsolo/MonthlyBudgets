@@ -26,6 +26,8 @@ namespace severedsolo
         public bool ContractInterceptor = true;
         [GameParameters.CustomParameterUI("Taxpayers always try to cover costs", toolTip = "When enabled, costs will always try to be deducted from the budget, even if funds are higher than the awarded budget")]
         public bool coverCosts = false;
+        [GameParameters.CustomParameterUI("Stop Timewarp on budget?", toolTip = "Will also add KAC alarm if applicable")]
+        public bool stopTimewarp = false;
         [GameParameters.CustomIntParameterUI("Decay percentage", minValue = 1, maxValue = 100, toolTip = "How much to decay the repuation by each month (if Reputation Decay is switched on)")]
         public int RepDecay = 10;
         [GameParameters.CustomIntParameterUI("Multiplier", minValue = 1, maxValue = 9999)]

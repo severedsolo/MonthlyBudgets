@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Linq;
 using KSP.UI.Screens;
 using System;
+using MonthlyBudgets_KACWrapper;
 
 namespace severedsolo
 {
@@ -25,6 +26,7 @@ namespace severedsolo
         float loanPercentage = 1.0f;
         float RepDecay = 0.1f;
         bool timeDiscrepancyLog = true;
+        bool stopTimeWarp;
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -81,8 +83,10 @@ namespace severedsolo
                     Reputation.Instance.AddReputation(-Reputation.CurrentRep*(RepDecay), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + RepDecay + "% Reputation");
                 }
-
-
+                if(!KACWrapper.AssemblyExists && stopTimeWarp)
+                {
+                    TimeWarp.SetRate(0, false, true);
+                }
             }
             catch
             {
@@ -99,6 +103,11 @@ namespace severedsolo
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
 
+        }
+        void Start()
+        {
+            KACWrapper.InitKACWrapper();
+            Debug.Log(KACWrapper.KAC.Alarms.Count);
         }
 
         void Update()
@@ -119,6 +128,17 @@ namespace severedsolo
             if (timeSinceLastUpdate >= budgetInterval)
             {
                 Budget(timeSinceLastUpdate);
+            }
+            if (KACWrapper.AssemblyExists && stopTimeWarp)
+            {
+                if (!KACWrapper.APIReady) return;
+                KACWrapper.KACAPI.KACAlarmList alarms = KACWrapper.KAC.Alarms;
+                for (int i = 0; i < alarms.Count; i++)
+                {
+                    string s = alarms[i].Name;
+                    if (s == "Next Budget") return;
+                }
+                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + budgetInterval);
             }
         }
 
@@ -169,6 +189,7 @@ namespace severedsolo
             if (!double.TryParse(node.GetValue("LastBudgetUpdate"), out lastUpdate)) lastUpdate = budgetInterval * 1000;
             timeDiscrepancyLog = true;
             coverCosts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().coverCosts;
+            stopTimeWarp = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().stopTimewarp;
             Debug.Log("[MonthlyBudgets]: Set Interval to " + budgetInterval + " (from " + friendlyInterval + " days)");
         }
 
@@ -262,6 +283,7 @@ namespace severedsolo
             vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100;
             coverCosts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().coverCosts;
+            stopTimeWarp = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().stopTimewarp;
         }
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {

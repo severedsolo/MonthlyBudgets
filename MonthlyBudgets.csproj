@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="ContractInterceptor.cs" />
     <Compile Include="DeadKerbalPenaliser.cs" />
+    <Compile Include="MonthlyBudgets_KACWrapper.cs" />
     <Compile Include="MonthlyBudget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BudgetSettings.cs" />

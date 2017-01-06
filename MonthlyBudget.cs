@@ -85,7 +85,7 @@ namespace severedsolo
                 }
                 if(!KACWrapper.AssemblyExists && stopTimeWarp)
                 {
-                    TimeWarp.SetRate(0, false, true);
+                    TimeWarp.SetRate(0, true);
                 }
             }
             catch
@@ -133,6 +133,7 @@ namespace severedsolo
             {
                 if (!KACWrapper.APIReady) return;
                 KACWrapper.KACAPI.KACAlarmList alarms = KACWrapper.KAC.Alarms;
+                if (alarms.Count == 0) return;
                 for (int i = 0; i < alarms.Count; i++)
                 {
                     string s = alarms[i].Name;

@@ -4,7 +4,7 @@ using System.Linq;
 using KSP.UI.Screens;
 using System;
 using MonthlyBudgets_KACWrapper;
-
+using Experience;
 namespace severedsolo
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
@@ -158,6 +158,7 @@ namespace severedsolo
             int budget = 0;
             foreach (ProtoCrewMember p in crew)
             {
+                if (p.type == ProtoCrewMember.KerbalType.Tourist) continue;
                 float level = p.experienceLevel;
                 if (level == 0) level = 0.5f;
                 float wages = 0;

@@ -10,6 +10,7 @@ namespace severedsolo
         bool disableContracts = true;
         public void Awake()
         {
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
             DontDestroyOnLoad(this);
             GameEvents.Contract.onOffered.Add(onOffered);
             GameEvents.OnGameSettingsApplied.Add(onSettings);

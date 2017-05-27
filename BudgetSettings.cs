@@ -10,14 +10,16 @@ namespace severedsolo
             MEDIUM,
             HARD,
         }
-
         public override string Title { get { return "Monthly Budget Options"; } }
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.CAREER; } }
         public override string Section { get { return "Monthly Budgets"; } }
+        public override string DisplaySection { get { return Section; } }
         public override int SectionOrder { get { return 1; } }
         public override bool HasPresets { get { return true; } }
         public bool autoPersistance = true;
         public bool newGameOnly = false;
+        [GameParameters.CustomParameterUI("Mod enabled?")]
+        public bool masterSwitch = true;
         [GameParameters.CustomParameterUI("Enable Hard Mode?", toolTip = "Removes some reputation if you have leftover funds at the end of a budget cycle")]
         public bool HardMode = false;
         [GameParameters.CustomParameterUI("Enable Reputation Decay?", toolTip = "Repuation naturally decreases over time")]

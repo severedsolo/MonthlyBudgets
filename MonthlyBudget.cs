@@ -97,6 +97,7 @@ namespace severedsolo
         void Awake()
         {
             DontDestroyOnLoad(this);
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
             GameEvents.onGameStateSave.Add(OnGameStateSave);
             GameEvents.onGameStateLoad.Add(OnGameStateLoad);
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);

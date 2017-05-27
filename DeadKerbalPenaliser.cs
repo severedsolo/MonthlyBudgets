@@ -7,6 +7,7 @@ namespace severedsolo
     {
         public void Awake()
         {
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
             DontDestroyOnLoad(this);
             GameEvents.onCrewKilled.Add(onCrewKilled);
         }

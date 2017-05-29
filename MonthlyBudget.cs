@@ -11,7 +11,7 @@ namespace severedsolo
     public class MonthlyBudgets : MonoBehaviour
     {
         public static double lastUpdate = 99999;
-        private float budgetInterval;
+        private double budgetInterval;
         private float friendlyInterval = 30;
         private int multiplier = 2227;
         private int availableWages = 1000;
@@ -188,7 +188,8 @@ namespace severedsolo
             availableWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
             assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
-            budgetInterval = friendlyInterval * 60 * 60 * 6;
+            if (HomeWorld == null) PopulateHomeWorldData();
+            budgetInterval = friendlyInterval * dayLength;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay;
             vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
@@ -222,6 +223,13 @@ namespace severedsolo
             }
         }
 
+        void PopulateHomeWorldData()
+        {
+            HomeWorld = FlightGlobals.GetHomeBody();
+            dayLength = HomeWorld.solarDayLength;
+            yearLength = HomeWorld.orbit.period;
+        }
+
         void GUIDisplay(int windowID)
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
@@ -229,12 +237,7 @@ namespace severedsolo
                 GUILayout.Label("MonthlyBudgets is only available in Career Games");
                 return;
             }
-            if(HomeWorld == null)
-            {
-                HomeWorld = FlightGlobals.GetHomeBody();
-                yearLength = HomeWorld.orbit.period;
-                dayLength = HomeWorld.solarDayLength;
-            }
+            if (HomeWorld == null) PopulateHomeWorldData();
          int costs = CostCalculate(false);
          int estimatedBudget = (int)Reputation.CurrentRep * multiplier;
             if(estimatedBudget <0)
@@ -289,7 +292,8 @@ namespace severedsolo
             availableWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
             assignedWages = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
             hardMode = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode;
-            budgetInterval = friendlyInterval * 60 * 60 * 6;
+            if (HomeWorld == null) PopulateHomeWorldData();
+            budgetInterval = friendlyInterval * dayLength;
             RepDecayEnabled = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled;
             vesselCost = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
             RepDecay = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100;

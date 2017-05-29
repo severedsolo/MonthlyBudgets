@@ -27,6 +27,9 @@ namespace severedsolo
         float RepDecay = 0.1f;
         bool timeDiscrepancyLog = true;
         bool stopTimeWarp;
+        CelestialBody HomeWorld;
+        double dayLength;
+        double yearLength;
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -207,7 +210,6 @@ namespace severedsolo
         {
             if (showGUI)
             {
-
                Window = GUILayout.Window(65468754, Window, GUIDisplay, "MonthlyBudgets", GUILayout.Width(200));
             }
         }
@@ -227,6 +229,12 @@ namespace severedsolo
                 GUILayout.Label("MonthlyBudgets is only available in Career Games");
                 return;
             }
+            if(HomeWorld == null)
+            {
+                HomeWorld = FlightGlobals.GetHomeBody();
+                yearLength = HomeWorld.orbit.period;
+                dayLength = HomeWorld.solarDayLength;
+            }
          int costs = CostCalculate(false);
          int estimatedBudget = (int)Reputation.CurrentRep * multiplier;
             if(estimatedBudget <0)
@@ -234,13 +242,13 @@ namespace severedsolo
                 estimatedBudget = 0;
             }
          double nextUpdateRaw = lastUpdate + budgetInterval;
-         float nextUpdateRefine = (float)nextUpdateRaw/6/60/60;
+         double nextUpdateRefine = nextUpdateRaw/dayLength;
          int year = 1;
          int day = 1;
-         while (nextUpdateRefine > 426.08)
+         while (nextUpdateRefine > yearLength/dayLength)
          {
                 year = year + 1;
-                nextUpdateRefine = nextUpdateRefine - 426.08f;
+                nextUpdateRefine = nextUpdateRefine - (yearLength/dayLength);
          }
             day = day + (int)nextUpdateRefine;
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);

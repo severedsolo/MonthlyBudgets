@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace severedsolo
+namespace MonthlyBudgets
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class DeadKerbalPenaliser : MonoBehaviour

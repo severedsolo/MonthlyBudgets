@@ -2,7 +2,7 @@
 using Contracts;
 using System;
 
-namespace severedsolo
+namespace MonthlyBudgets
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class ContractInterceptor : MonoBehaviour

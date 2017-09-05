@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace severedsolo
+namespace MonthlyBudgets
 {
     class BudgetSettings : GameParameters.CustomParameterNode
     {

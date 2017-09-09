@@ -72,6 +72,8 @@ namespace MonthlyBudgets
                         double upgradeBudgetReserved = budget * (emergencyBudgetPercentage / 100);
                         budget = budget - upgradeBudgetReserved;
                         emergencyBudget = emergencyBudget + upgradeBudgetReserved;
+                        emergencyBudget = Math.Round(emergencyBudget, 0);
+                        Debug.Log("[MonthlyBudgets]: Diverted " + emergencyBudgetPercentage + "% of budget. BPF is now: "+emergencyBudget);
                     }
                     Funding.Instance.AddFunds(-funds, TransactionReasons.None);
                     Funding.Instance.AddFunds(budget, TransactionReasons.None);
@@ -207,21 +209,21 @@ namespace MonthlyBudgets
                 return;
             }
             if (HomeWorld == null) PopulateHomeWorldData();
-         int costs = CostCalculate(false);
-         int estimatedBudget = (int)Reputation.CurrentRep * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
-            if(estimatedBudget <0)
+            int costs = CostCalculate(false);
+            int estimatedBudget = (int)Reputation.CurrentRep * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
+            if (estimatedBudget < 0)
             {
                 estimatedBudget = 0;
             }
-         double nextUpdateRaw = lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength);
-         double nextUpdateRefine = nextUpdateRaw/dayLength;
-         int year = 1;
-         int day = 1;
-         while (nextUpdateRefine > yearLength/dayLength)
-         {
+            double nextUpdateRaw = lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength);
+            double nextUpdateRefine = nextUpdateRaw / dayLength;
+            int year = 1;
+            int day = 1;
+            while (nextUpdateRefine > yearLength / dayLength)
+            {
                 year = year + 1;
-                nextUpdateRefine = nextUpdateRefine - (yearLength/dayLength);
-         }
+                nextUpdateRefine = nextUpdateRefine - (yearLength / dayLength);
+            }
             day = day + (int)nextUpdateRefine;
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
@@ -237,27 +239,13 @@ namespace MonthlyBudgets
                 enableEmergencyBudget = false;
             }
             GUI.DragWindow();
-
-        }
-
-        bool ValidateString(string s)
-        {
-            if (!float.TryParse(s, out float f)) return false;
-            if (f < 10 || f > 50) return false;
-            return true;
         }
 
         public void GUISwitch()
         {
-            if (showGUI)
-            {
-                showGUI = false;
-            }
-            else
-            {
-                showGUI = true;
-            }
+            showGUI = !showGUI;
         }
+
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {
             if (ToolbarButton == null) return;

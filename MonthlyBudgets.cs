@@ -4,7 +4,6 @@ using System.Linq;
 using KSP.UI.Screens;
 using System;
 using MonthlyBudgets_KACWrapper;
-using Experience;
 
 namespace MonthlyBudgets
 {
@@ -17,7 +16,7 @@ namespace MonthlyBudgets
         public bool enableEmergencyBudget;
         public double emergencyBudget = 0;
         bool showGUI = false;
-        ApplicationLauncherButton ToolbarButton;
+        ApplicationLauncherButton toolbarButton;
         Rect Window = new Rect(20, 100, 240, 50);
         bool timeDiscrepancyLog = true;
         CelestialBody HomeWorld;
@@ -83,7 +82,7 @@ namespace MonthlyBudgets
                 lastUpdate = lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval*dayLength);
                 if (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled)
                 {
-                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay/100), TransactionReasons.None);
+                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay/100.0f), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100 + "% Reputation");
                 }
                 if(!KACWrapper.AssemblyExists && HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().stopTimewarp)
@@ -188,9 +187,9 @@ namespace MonthlyBudgets
         public void GUIReady()
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER || HighLogic.LoadedScene == GameScenes.MAINMENU) return;
-            if (ToolbarButton == null)
+            if (toolbarButton == null)
             {
-                ToolbarButton = ApplicationLauncher.Instance.AddModApplication(GUISwitch, GUISwitch, null, null, null, null, ApplicationLauncher.AppScenes.ALWAYS, GameDatabase.Instance.GetTexture("MonthlyBudgets/Icon", false));
+                toolbarButton = ApplicationLauncher.Instance.AddModApplication(GUISwitch, GUISwitch, null, null, null, null, ApplicationLauncher.AppScenes.ALWAYS, GameDatabase.Instance.GetTexture("MonthlyBudgets/Icon", false));
             }
         }
 
@@ -248,8 +247,8 @@ namespace MonthlyBudgets
 
         void onGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {
-            if (ToolbarButton == null) return;
-            ApplicationLauncher.Instance.RemoveModApplication(ToolbarButton);
+            if (toolbarButton == null) return;
+            ApplicationLauncher.Instance.RemoveModApplication(toolbarButton);
             showGUI = false;
         }
     }

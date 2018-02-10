@@ -27,4 +27,20 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             MonthlyBudgets.instance.inputString = MonthlyBudgets.instance.emergencyBudgetPercentage.ToString();
         }
     }
+    [KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames,
+GameScenes.FLIGHT)]
+    class BudgetProgressionScenario : ScenarioModule
+    {
+        public override void OnSave(ConfigNode savedNode)
+        {
+            savedNode.SetValue("SpeedRecordIndex", RecordsReplacer.instance.speedRecordIndex, true);
+            savedNode.SetValue("AltitudeRecordIndex", RecordsReplacer.instance.altitudeRecordIndex, true);
+        }
+
+        public override void OnLoad(ConfigNode node)
+        {
+            node.TryGetValue("SpeedRecordIndex", ref RecordsReplacer.instance.speedRecordIndex);
+            node.TryGetValue("AltitudeRecordIndex", ref RecordsReplacer.instance.altitudeRecordIndex);;
+        }
+    }
 }

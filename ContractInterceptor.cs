@@ -43,11 +43,8 @@ namespace MonthlyBudgets
             if (!(contract.FundsCompletion > 0)) return;
             int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
-            rep = (int)(contract.FundsFailure/10000);
-            contract.ReputationFailure = contract.ReputationFailure + rep;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;
-            contract.FundsFailure = 0;
             Debug.Log("[MonthlyBudgets]: Intercepted contract: " + contract.Title+ ": Removed fund award. An extra " + rep + " reputation will be awarded instead");
         }
     }

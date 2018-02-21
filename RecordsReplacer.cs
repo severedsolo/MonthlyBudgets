@@ -10,12 +10,12 @@ namespace MonthlyBudgets
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class RecordsReplacer : MonoBehaviour
     {
-        public static RecordsReplacer instance;
+        RecordsReplacer instance;
         List<int> speedRecords = new List<int>();
         List<int> altitudeRecords = new List<int>();
         List<int> distanceRecords = new List<int>();
-        public int speedRecordIndex = 0;
-        public int altitudeRecordIndex = 0;
+        int speedRecordIndex = 0;
+        int altitudeRecordIndex = 0;
         StringBuilder message = new StringBuilder();
         MessageSystem.Message m;
         
@@ -45,9 +45,8 @@ namespace MonthlyBudgets
             {
                 if (FlightGlobals.ActiveVessel.speed > speedRecords.ElementAt(speedRecordIndex))
                 {
-                    Reputation.Instance.AddReputation(3, TransactionReasons.Progression);
+                    Reputation.Instance.AddReputation(5, TransactionReasons.Progression);
                     message.AppendLine("Broke speed record of " + speedRecords.ElementAt(speedRecordIndex) + " m/s");
-                    message.AppendLine("Awarded <color=#EEE8AA>3</color> reputation");
                     speedRecordIndex++;
                     recordAchieved = true;
                 }
@@ -56,7 +55,7 @@ namespace MonthlyBudgets
             {
                 if (FlightGlobals.ActiveVessel.altitude > altitudeRecords.ElementAt(altitudeRecordIndex))
                 {
-                    Reputation.Instance.AddReputation(3, TransactionReasons.Progression);
+                    Reputation.Instance.AddReputation(5, TransactionReasons.Progression);
                     message.AppendLine("Broke altitude record of " + altitudeRecords.ElementAt(altitudeRecordIndex) + "m");
                     recordAchieved = true;
                     altitudeRecordIndex++;

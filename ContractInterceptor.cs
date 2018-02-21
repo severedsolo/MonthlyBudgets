@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Contracts;
 using System;
-using KSP.UI.Screens;
 
 namespace MonthlyBudgets
 {
@@ -33,8 +32,6 @@ namespace MonthlyBudgets
         public void OnDestroy()
         {
             GameEvents.Contract.onOffered.Remove(onOffered);
-            GameEvents.OnGameSettingsApplied.Remove(onSettings);
-            GameEvents.onGameStateLoad.Remove(onLoaded);
         }
 
         private void onOffered(Contract contract)
@@ -45,7 +42,7 @@ namespace MonthlyBudgets
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;
-            Debug.Log("[MonthlyBudgets]: Intercepted contract: " + contract.Title+ ": Removed fund award. An extra " + rep + " reputation will be awarded instead");
+            Debug.Log("[MonthlyBudgets]: Intercepted " + contract.ContractID + "of type " +contract.Title+ ": Removed fund award. An extra " + rep + " reputation will be awarded instead");
         }
     }
 }

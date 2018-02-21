@@ -26,8 +26,6 @@ namespace MonthlyBudgets
         public bool DecayEnabled = false;
         [GameParameters.CustomParameterUI("Disable Contract Funding?", toolTip = "Converts contract funding rewards to reputation")]
         public bool ContractInterceptor = true;
-        [GameParameters.CustomParameterUI("Disable Progression Funding?", toolTip = "Converts records (distance/speed) funding rewards to reputation")]
-        public bool DisableRecords = true;
         [GameParameters.CustomParameterUI("Taxpayers always try to cover costs", toolTip = "When enabled, costs will always try to be deducted from the budget, even if funds are higher than the awarded budget")]
         public bool coverCosts = false;
         [GameParameters.CustomParameterUI("Stop Timewarp on budget?", toolTip = "Will also add KAC alarm if applicable")]

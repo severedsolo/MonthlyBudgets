@@ -41,27 +41,30 @@ namespace MonthlyBudgets
         private void GUIDisplay(int id)
         {
             masterSwitch = GUILayout.Toggle(masterSwitch, "Mod Enabled");
-            if (!masterSwitch) return;
-            hardMode = GUILayout.Toggle(hardMode, "Deduct reputation for not spending entire budget?");
-            contractInterceptor = GUILayout.Toggle(contractInterceptor, "Contracts pay reputation instead of funds?");
-            coverCosts = GUILayout.Toggle(coverCosts, "Always try to deduct costs from budget, even if current funds are higher?");
-            stopTimewarp = GUILayout.Toggle(stopTimewarp, "Stop Timewarp/Set KAC Alarms on Budget");
-            decayEnabled = GUILayout.Toggle(decayEnabled, "Decay Reputation each budget?");
-            GUILayout.Label("Decay percentage");
-            if(decayEnabled)int.TryParse(GUILayout.TextField(repDecay.ToString()), out repDecay);
-            GUILayout.Label("Budget Multiplier");
-            int.TryParse(GUILayout.TextField(multiplier.ToString()), out multiplier);
-            GUILayout.Label("Unassigned Kerbal Wages (at experience level 1)");
-            int.TryParse(GUILayout.TextField(availableWages.ToString()), out availableWages);
-            GUILayout.Label("Assigned Kerbal Wages (at experience level 1");
-            int.TryParse(GUILayout.TextField(assignedWages.ToString()), out assignedWages);
-            GUILayout.Label("Monthly cost per active vessel");
-            int.TryParse(GUILayout.TextField(vesselCost.ToString()), out vesselCost);
+            if (masterSwitch)
+            {
+                hardMode = GUILayout.Toggle(hardMode, "Deduct reputation for not spending entire budget?");
+                contractInterceptor = GUILayout.Toggle(contractInterceptor, "Contracts pay reputation instead of funds?");
+                coverCosts = GUILayout.Toggle(coverCosts, "Always try to deduct costs from budget, even if current funds are higher?");
+                stopTimewarp = GUILayout.Toggle(stopTimewarp, "Stop Timewarp/Set KAC Alarms on Budget");
+                decayEnabled = GUILayout.Toggle(decayEnabled, "Decay Reputation each budget?");
+                GUILayout.Label("Decay percentage");
+                if (decayEnabled) int.TryParse(GUILayout.TextField(repDecay.ToString()), out repDecay);
+                GUILayout.Label("Budget Multiplier");
+                int.TryParse(GUILayout.TextField(multiplier.ToString()), out multiplier);
+                GUILayout.Label("Unassigned Kerbal Wages (at experience level 1)");
+                int.TryParse(GUILayout.TextField(availableWages.ToString()), out availableWages);
+                GUILayout.Label("Assigned Kerbal Wages (at experience level 1");
+                int.TryParse(GUILayout.TextField(assignedWages.ToString()), out assignedWages);
+                GUILayout.Label("Monthly cost per active vessel");
+                int.TryParse(GUILayout.TextField(vesselCost.ToString()), out vesselCost);
+            }
             if (GUILayout.Button("Close"))
             {
                 showGUI = false;
                 firstRun = false;
             }
+            GUI.DragWindow();
         }
 
         public void FirstRun()

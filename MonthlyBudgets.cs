@@ -36,7 +36,8 @@ namespace MonthlyBudgets
                     if (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode)
                     {
                         int penalty = (int)funds / 10000;
-                        Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+                        if (penalty > Reputation.Instance.reputation) Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+                        else Reputation.Instance.AddReputation(Reputation.Instance.reputation * -1, TransactionReasons.None);
                         Debug.Log("[MonthlyBudgets]: " + funds + "remaining, " + penalty + " reputation removed");
                     }
                     costs = CostCalculate(true);

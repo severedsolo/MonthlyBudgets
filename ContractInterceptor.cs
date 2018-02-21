@@ -38,7 +38,10 @@ namespace MonthlyBudgets
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !disableContracts) return;
             if (!(contract.FundsCompletion > 0)) return;
-            int rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
+            int rep = (int)((contract.FundsAdvance / 10000*-1) - (int)contract.FundsFailure/10000);
+            contract.FundsFailure = 0;
+            contract.ReputationFailure = rep - contract.ReputationFailure;
+            rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;

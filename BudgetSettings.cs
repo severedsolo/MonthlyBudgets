@@ -13,7 +13,7 @@ namespace MonthlyBudgets
         public bool decayEnabled = false;
         public bool contractInterceptor = true;
         public bool coverCosts = false;
-        public bool stopTimewarp = false;
+        public bool stopTimewarp = true;
         public int repDecay = 10;
         public int multiplier = 2227;
         public float friendlyInterval = 30;

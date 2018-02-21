@@ -27,6 +27,7 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("AvailableWages", BudgetSettings.instance.availableWages, true);
             savedNode.SetValue("AssignedWages", BudgetSettings.instance.assignedWages, true);
             savedNode.SetValue("VesselCost", BudgetSettings.instance.vesselCost, true);
+            savedNode.SetValue("FirstRun", BudgetSettings.instance.firstRun, true);
         }
 
         public override void OnLoad(ConfigNode node)

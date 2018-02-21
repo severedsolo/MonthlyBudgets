@@ -239,6 +239,7 @@ namespace MonthlyBudgets
                 emergencyBudget = 0;
                 enableEmergencyBudget = false;
             }
+            if (GUILayout.Button("Settings")) BudgetSettings.instance.showGUI = true;
             GUI.DragWindow();
         }
 

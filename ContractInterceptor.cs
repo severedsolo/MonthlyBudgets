@@ -10,7 +10,7 @@ namespace MonthlyBudgets
         bool disableContracts = true;
         public void Awake()
         {
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
+            if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             DontDestroyOnLoad(this);
             GameEvents.Contract.onOffered.Add(onOffered);
             GameEvents.OnGameSettingsApplied.Add(onSettings);
@@ -19,12 +19,12 @@ namespace MonthlyBudgets
 
         private void onLoaded(ConfigNode data)
         {
-            disableContracts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().ContractInterceptor;
+            disableContracts = BudgetSettings.instance.contractInterceptor;
         }
 
         private void onSettings()
         {
-            disableContracts = HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().ContractInterceptor;
+            disableContracts = BudgetSettings.instance.contractInterceptor;
             if(disableContracts)Debug.Log("[MonthlyBudgets]: Starting Contract Interceptor");
             if(!disableContracts)Debug.Log("[MonthlyBudgets]: Contract Interceptor has been disabled");
         }

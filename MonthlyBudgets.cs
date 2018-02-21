@@ -24,6 +24,7 @@ namespace MonthlyBudgets
         double yearLength;
         public string inputString;
 
+
         private void Budget(double timeSinceLastUpdate)
         {
             try
@@ -31,9 +32,9 @@ namespace MonthlyBudgets
                 double funds = Funding.Instance.Funds;
                 float costs = 0;
                 double offsetFunds = funds;
-                if ((HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval*dayLength) * 2 > timeSinceLastUpdate)
+                if ((BudgetSettings.instance.friendlyInterval*dayLength) * 2 > timeSinceLastUpdate)
                 {
-                    if (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().HardMode)
+                    if (BudgetSettings.instance.hardMode)
                     {
                         int penalty = (int)funds / 10000;
                         if (penalty > Reputation.Instance.reputation) Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
@@ -44,12 +45,12 @@ namespace MonthlyBudgets
                     offsetFunds = funds - costs;
                 }
                 float rep = Reputation.CurrentRep;
-                double budget = (rep * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier) - costs;
+                double budget = (rep * BudgetSettings.instance.multiplier) - costs;
                 //we shouldn't take money away. If the player holds more than the budget, just don't award.
                 if (budget <= offsetFunds)
                 {
                     ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
-                    if (budget < costs || !HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().coverCosts)
+                    if (budget < costs || !BudgetSettings.instance.coverCosts)
                     {
                         if (costs > 0)
                         {
@@ -60,7 +61,7 @@ namespace MonthlyBudgets
                     else
                     {
                         ScreenMessages.PostScreenMessage("The budget will cover your costs");
-                        float repLoss = costs / HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
+                        float repLoss = costs / BudgetSettings.instance.multiplier;
                         Reputation.Instance.AddReputation(-repLoss, TransactionReasons.None);
                     }
                     Debug.Log("[MonthlyBudgets]: Budget of " + budget + " is less than available funds of " + funds);
@@ -80,13 +81,13 @@ namespace MonthlyBudgets
                     ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
                     Debug.Log("[MonthlyBudgets]: Budget awarded: " + budget);
                 }
-                lastUpdate = lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval*dayLength);
-                if (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().DecayEnabled)
+                lastUpdate = lastUpdate + (BudgetSettings.instance.friendlyInterval*dayLength);
+                if (BudgetSettings.instance.decayEnabled)
                 {
-                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay/100.0f), TransactionReasons.None);
-                    Debug.Log("[MonthlyBudgets]: Removing " + HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().RepDecay / 100 + "% Reputation");
+                    Reputation.Instance.AddReputation(-Reputation.CurrentRep*(BudgetSettings.instance.repDecay/100.0f), TransactionReasons.None);
+                    Debug.Log("[MonthlyBudgets]: Removing " + BudgetSettings.instance.repDecay / 100 + "% Reputation");
                 }
-                if(!KACWrapper.AssemblyExists && HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().stopTimewarp)
+                if(!KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
                 {
                     TimeWarp.SetRate(0, true);
                 }
@@ -100,7 +101,7 @@ namespace MonthlyBudgets
         void Awake()
         {
             DontDestroyOnLoad(this);
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
+            if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             instance = this;
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);
             GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
@@ -121,7 +122,7 @@ namespace MonthlyBudgets
             double time = (Planetarium.GetUniversalTime());
             while (lastUpdate > time)
             {
-                lastUpdate = lastUpdate - (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength);
+                lastUpdate = lastUpdate - (BudgetSettings.instance.friendlyInterval * dayLength);
                 if (timeDiscrepancyLog)
                 {
                     Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
@@ -129,11 +130,11 @@ namespace MonthlyBudgets
                 }
             }
             double timeSinceLastUpdate = time - lastUpdate;
-            if (timeSinceLastUpdate >= (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength))
+            if (timeSinceLastUpdate >= (BudgetSettings.instance.friendlyInterval * dayLength))
             {
                 Budget(timeSinceLastUpdate);
             }
-            if (KACWrapper.AssemblyExists && HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().stopTimewarp)
+            if (KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
             {
                 if (!KACWrapper.APIReady) return;
                 KACWrapper.KACAPI.KACAlarmList alarms = KACWrapper.KAC.Alarms;
@@ -143,7 +144,7 @@ namespace MonthlyBudgets
                     string s = alarms[i].Name;
                     if (s == "Next Budget") return;
                 }
-                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength));
+                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength));
             }
         }
 
@@ -163,12 +164,12 @@ namespace MonthlyBudgets
                 float level = p.experienceLevel;
                 if (level == 0) level = 0.5f;
                 float wages = 0;
-                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) wages = level * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().availableWages;
-                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) wages = level * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().assignedWages;
+                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) wages = level * BudgetSettings.instance.availableWages;
+                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) wages = level * BudgetSettings.instance.assignedWages;
                 budget = budget + (int)wages;
             }
             IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown && v.vesselType != VesselType.EVA);
-            int vesselBudget = vessels.Count() * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().vesselCost;
+            int vesselBudget = vessels.Count() * BudgetSettings.instance.vesselCost;
             budget = budget + vesselBudget;
             if (log)
             {
@@ -210,12 +211,12 @@ namespace MonthlyBudgets
             }
             if (HomeWorld == null) PopulateHomeWorldData();
             int costs = CostCalculate(false);
-            int estimatedBudget = (int)Reputation.CurrentRep * HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().Multiplier;
+            int estimatedBudget = (int)Reputation.CurrentRep * BudgetSettings.instance.multiplier;
             if (estimatedBudget < 0)
             {
                 estimatedBudget = 0;
             }
-            double nextUpdateRaw = lastUpdate + (HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().friendlyInterval * dayLength);
+            double nextUpdateRaw = lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength);
             double nextUpdateRefine = nextUpdateRaw / dayLength;
             int year = 1;
             int day = 1;

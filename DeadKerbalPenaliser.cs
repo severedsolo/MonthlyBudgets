@@ -7,7 +7,7 @@ namespace MonthlyBudgets
     {
         public void Awake()
         {
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<BudgetSettings>().masterSwitch) Destroy(this);
+            if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             DontDestroyOnLoad(this);
             GameEvents.onCrewKilled.Add(onCrewKilled);
         }

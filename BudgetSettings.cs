@@ -1,86 +1,86 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using System.IO;
 
 namespace MonthlyBudgets
 {
-    class BudgetSettings : GameParameters.CustomParameterNode
+    [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
+    class BudgetSettings : MonoBehaviour
     {
-        public enum BudgetDifficulty
-        {
-            EASY,
-            MEDIUM,
-            HARD,
-        }
-        public override string Title { get { return "Monthly Budget Options"; } }
-        public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.CAREER; } }
-        public override string Section { get { return "Monthly Budgets"; } }
-        public override string DisplaySection { get { return Section; } }
-        public override int SectionOrder { get { return 1; } }
-        public override bool HasPresets { get { return true; } }
-        public bool autoPersistance = true;
-        public bool newGameOnly = false;
-        [GameParameters.CustomParameterUI("Mod enabled?")]
+        public static BudgetSettings instance;
         public bool masterSwitch = true;
-        [GameParameters.CustomParameterUI("Enable Hard Mode?", toolTip = "Removes some reputation if you have leftover funds at the end of a budget cycle")]
-        public bool HardMode = false;
-        [GameParameters.CustomParameterUI("Enable Reputation Decay?", toolTip = "Repuation naturally decreases over time")]
-        public bool DecayEnabled = false;
-        [GameParameters.CustomParameterUI("Disable Contract Funding?", toolTip = "Converts contract funding rewards to reputation")]
-        public bool ContractInterceptor = true;
-        [GameParameters.CustomParameterUI("Taxpayers always try to cover costs", toolTip = "When enabled, costs will always try to be deducted from the budget, even if funds are higher than the awarded budget")]
+        public bool hardMode = false;
+        public bool decayEnabled = false;
+        public bool contractInterceptor = true;
         public bool coverCosts = false;
-        [GameParameters.CustomParameterUI("Stop Timewarp on budget?", toolTip = "Will also add KAC alarm if applicable")]
         public bool stopTimewarp = false;
-        [GameParameters.CustomIntParameterUI("Decay percentage", minValue = 1, maxValue = 100, toolTip = "How much to decay the repuation by each month (if Reputation Decay is switched on)")]
-        public int RepDecay = 10;
-        [GameParameters.CustomIntParameterUI("Multiplier", minValue = 1, maxValue = 9999)]
-        public int  Multiplier = 2227;
-        [GameParameters.CustomFloatParameterUI("Budget Interval", minValue = 1, maxValue = 427)]
+        public int repDecay = 10;
+        public int multiplier = 2227;
         public float friendlyInterval = 30;
-        [GameParameters.CustomIntParameterUI("Unassigned Kerbal Wages", minValue = 1000, maxValue = 100000)]
         public int availableWages = 1000;
-        [GameParameters.CustomIntParameterUI("Assigned Kerbal Wages", minValue = 1000, maxValue = 100000)]
         public int assignedWages = 2000;
-        [GameParameters.CustomIntParameterUI("Vessel Maintenance cost", minValue = 1000, maxValue = 100000)]
         public int vesselCost = 10000;
-        
-
-
-        public override void SetDifficultyPreset(GameParameters.Preset preset)
+        public bool firstRun = true;
+        public bool showGUI = false;
+        Rect Window = new Rect(20, 100, 240, 50);
+        string SavedFile = KSPUtil.ApplicationRootPath + "/GameData/MonthlyBudgets/MonthlyBudgetDefaults.cfg";
+        void Awake()
         {
-            Debug.Log("[MonthlyBudgets]: Setting difficulty preset");
-            switch (preset)
+            instance = this;
+            DontDestroyOnLoad(this);
+        }
+
+        public void OnGUI()
+        {
+            if (showGUI)
             {
-                case GameParameters.Preset.Easy:
-                    Multiplier = 5000;
-                    availableWages = 500;
-                    assignedWages = 1000;
-                    vesselCost = 5000;
-                    break;
-
-                case GameParameters.Preset.Normal:
-                    Multiplier = 2227;
-                    availableWages = 1000;
-                    assignedWages = 2000;
-                    vesselCost = 10000;
-                    break;
-
-                case GameParameters.Preset.Moderate:
-                    Multiplier = 1000;
-                    availableWages = 3500;
-                    assignedWages = 6000;
-                    vesselCost = 12000;
-                    DecayEnabled = true;
-                    break;
-
-                case GameParameters.Preset.Hard:
-                    Multiplier = 500;
-                    availableWages = 5000;
-                    assignedWages = 10000;
-                    vesselCost = 20000;
-                    DecayEnabled = true;
-                    HardMode = true;
-                    break;
+                Window = GUILayout.Window(20989359, Window, GUIDisplay, "MonthlyBudgets Settings", GUILayout.Width(200));
             }
+        }
+
+        private void GUIDisplay(int id)
+        {
+            masterSwitch = GUILayout.Toggle(masterSwitch, "Mod Enabled");
+            if (!masterSwitch) return;
+            hardMode = GUILayout.Toggle(hardMode, "Deduct reputation for not spending entire budget?");
+            contractInterceptor = GUILayout.Toggle(contractInterceptor, "Contracts pay reputation instead of funds?");
+            coverCosts = GUILayout.Toggle(coverCosts, "Always try to deduct costs from budget, even if current funds are higher?");
+            stopTimewarp = GUILayout.Toggle(stopTimewarp, "Stop Timewarp/Set KAC Alarms on Budget");
+            decayEnabled = GUILayout.Toggle(decayEnabled, "Decay Reputation each budget?");
+            GUILayout.Label("Decay percentage");
+            if(decayEnabled)int.TryParse(GUILayout.TextField(repDecay.ToString()), out repDecay);
+            GUILayout.Label("Budget Multiplier");
+            int.TryParse(GUILayout.TextField(multiplier.ToString()), out multiplier);
+            GUILayout.Label("Unassigned Kerbal Wages (at experience level 1)");
+            int.TryParse(GUILayout.TextField(availableWages.ToString()), out availableWages);
+            GUILayout.Label("Assigned Kerbal Wages (at experience level 1");
+            int.TryParse(GUILayout.TextField(assignedWages.ToString()), out assignedWages);
+            GUILayout.Label("Monthly cost per active vessel");
+            int.TryParse(GUILayout.TextField(vesselCost.ToString()), out vesselCost);
+            if (GUILayout.Button("Close"))
+            {
+                showGUI = false;
+                firstRun = false;
+            }
+        }
+
+        public void FirstRun()
+        {
+            firstRun = false;
+            showGUI = true;
+            if (!File.Exists(SavedFile)) return;
+            ConfigNode settings = ConfigNode.Load(SavedFile);
+            bool.TryParse(settings.GetValue("masterSwitch"), out masterSwitch);
+            bool.TryParse(settings.GetValue("hardMode"), out hardMode);
+            bool.TryParse(settings.GetValue("contractInterceptor"), out contractInterceptor);
+            bool.TryParse(settings.GetValue("coverCosts"), out coverCosts);
+            bool.TryParse(settings.GetValue("stopTimewarp"), out stopTimewarp);
+            bool.TryParse(settings.GetValue("decayEnabled"), out decayEnabled);
+            int.TryParse(settings.GetValue("repDecay"), out repDecay);
+            int.TryParse(settings.GetValue("multiplier"), out multiplier);
+            int.TryParse(settings.GetValue("availableWages"), out availableWages);
+            int.TryParse(settings.GetValue("assignedWages"), out assignedWages);
+            int.TryParse(settings.GetValue("vesselCost"), out vesselCost);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace MonthlyBudgets
         double dayLength;
         double yearLength;
         public string inputString;
+        public float researchBudget = 0;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -37,8 +38,8 @@ namespace MonthlyBudgets
                     if (BudgetSettings.instance.hardMode)
                     {
                         int penalty = (int)funds / 10000;
-                        if (penalty > Reputation.Instance.reputation) Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
-                        else Reputation.Instance.AddReputation(Reputation.Instance.reputation * -1, TransactionReasons.None);
+                        if (penalty < Reputation.CurrentRep) Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+                        else Reputation.Instance.AddReputation(-Reputation.CurrentRep, TransactionReasons.None);
                         Debug.Log("[MonthlyBudgets]: " + funds + "remaining, " + penalty + " reputation removed");
                     }
                     costs = CostCalculate(true);
@@ -46,6 +47,15 @@ namespace MonthlyBudgets
                 }
                 float rep = Reputation.CurrentRep;
                 double budget = (rep * BudgetSettings.instance.multiplier) - costs;
+                if(researchBudget >0)
+                {
+                    float rnd = ((float)budget/10000) * (researchBudget / 100);
+                    ResearchAndDevelopment.Instance.AddScience(rnd, TransactionReasons.RnDs);
+                    ScreenMessages.PostScreenMessage("R&D Department have provided " + Math.Round(rnd,1) + " science this month");
+                    Debug.Log("[MonthlyBudgets]: " + Math.Round(rnd,1) + " science awarded by R&D");
+                    Reputation.Instance.AddReputation(-(Reputation.CurrentRep * (researchBudget / 100)), TransactionReasons.RnDs);
+                    budget = budget - (budget * (researchBudget / 100));
+                }
                 //we shouldn't take money away. If the player holds more than the budget, just don't award.
                 if (budget <= offsetFunds)
                 {
@@ -229,6 +239,8 @@ namespace MonthlyBudgets
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
+            GUILayout.Label("Percentage of budget dedicated to R&D");
+            if (!float.TryParse(GUILayout.TextField(researchBudget.ToString()), out researchBudget) || researchBudget <0 || researchBudget >100) researchBudget = 0;
             enableEmergencyBudget = GUILayout.Toggle(enableEmergencyBudget, "Enable Big Project Fund");
             GUILayout.Label("Big Project Fund: $" + emergencyBudget);
             GUILayout.Label("Percentage to divert to fund");

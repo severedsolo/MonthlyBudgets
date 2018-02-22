@@ -28,6 +28,7 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("AssignedWages", BudgetSettings.instance.assignedWages, true);
             savedNode.SetValue("VesselCost", BudgetSettings.instance.vesselCost, true);
             savedNode.SetValue("FirstRun", BudgetSettings.instance.firstRun, true);
+            savedNode.SetValue("RnD", MonthlyBudgets.instance.researchBudget, true);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -48,6 +49,7 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             node.TryGetValue("AssignedWages", ref BudgetSettings.instance.assignedWages);
             node.TryGetValue("VesselCost", ref BudgetSettings.instance.vesselCost);
             node.TryGetValue("FirstRun", ref BudgetSettings.instance.firstRun);
+            node.TryGetValue("RnD", ref MonthlyBudgets.instance.researchBudget);
             MonthlyBudgets.instance.inputString = MonthlyBudgets.instance.emergencyBudgetPercentage.ToString();
             if (BudgetSettings.instance.firstRun) BudgetSettings.instance.FirstRun();
         }

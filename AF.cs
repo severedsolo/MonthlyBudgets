@@ -52,12 +52,12 @@ namespace MonthlyBudgets
                 {
                     firstWindow = false;
                     secondWindow = true;
+                    originalFunding = Funding.Instance.Funds;
+                    Funding.Instance.AddFunds(-Funding.Instance.Funds, TransactionReasons.None);
                 }
             }
             if(secondWindow)
             {
-                originalFunding = Funding.Instance.Funds;
-                Funding.Instance.AddFunds(-Funding.Instance.Funds, TransactionReasons.None);
                 headlineStyle.fontSize = 24;
                 headlineStyle.normal.textColor = Color.red;
                 GUILayout.Label("From the desk of Mortimer Kerman", headlineStyle);

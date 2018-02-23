@@ -24,6 +24,7 @@ namespace MonthlyBudgets
         double yearLength;
         public string inputString;
         public float researchBudget = 0;
+        public bool jokeSeen = false;
 
 
         private void Budget(double timeSinceLastUpdate)

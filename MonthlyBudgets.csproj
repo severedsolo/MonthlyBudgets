@@ -57,6 +57,7 @@
     <Compile Include="MonthlyBudgets.cs" />
     <Compile Include="MonthlyBudgets_KACWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AF.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

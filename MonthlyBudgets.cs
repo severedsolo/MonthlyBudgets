@@ -126,6 +126,7 @@ namespace MonthlyBudgets
 
         void Update()
         {
+            if (HighLogic.CurrentGame == null) return;
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
             if (lastUpdate == 99999) return;
             if (emergencyBudgetPercentage < 1) emergencyBudgetPercentage = 10;

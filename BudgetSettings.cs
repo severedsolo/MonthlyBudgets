@@ -23,7 +23,7 @@ namespace MonthlyBudgets
         public bool firstRun = true;
         public bool showGUI = false;
         Rect Window = new Rect(20, 100, 240, 50);
-        string SavedFile = KSPUtil.ApplicationRootPath + "/GameData/MonthlyBudgets/MonthlyBudgetDefaults.cfg";
+        string SavedFile = KSPUtil.ApplicationRootPath + "/GameData/MonthlyBudgets/PluginData/MonthlyBudgetDefaults.cfg";
         void Awake()
         {
             instance = this;

@@ -15,11 +15,14 @@ namespace MonthlyBudgets
             GameEvents.Contract.onOffered.Add(onOffered);
             GameEvents.OnGameSettingsApplied.Add(onSettings);
             GameEvents.onGameStateLoad.Add(onLoaded);
+            if (disableContracts) Debug.Log("[MonthlyBudgets]: Starting Contract Interceptor");
+            if (!disableContracts) Debug.Log("[MonthlyBudgets]: Contract Interceptor has been disabled");
         }
 
         private void onLoaded(ConfigNode data)
         {
             disableContracts = BudgetSettings.instance.contractInterceptor;
+            if (!disableContracts) Debug.Log("[MonthlyBudgets]: Contract Interceptor has been disabled");
         }
 
         private void onSettings()
@@ -43,6 +46,7 @@ namespace MonthlyBudgets
             contract.ReputationFailure = rep - contract.ReputationFailure;
             rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
+            if (contract.ReputationCompletion < 1) contract.ReputationCompletion = 1;
             contract.FundsAdvance = 0;
             contract.FundsCompletion = 0;
             Debug.Log("[MonthlyBudgets]: Intercepted " + contract.ContractID + "of type " +contract.Title+ ": Removed fund award. An extra " + rep + " reputation will be awarded instead");

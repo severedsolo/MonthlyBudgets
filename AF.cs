@@ -19,7 +19,7 @@ namespace MonthlyBudgets
 
         void Start()
         {
-            if (DateTime.Today.Day == 1 && DateTime.Today.Month == 4 && !MonthlyBudgets.instance.jokeSeen) showGUI = true;
+            if (DateTime.Today.Day == 1 && DateTime.Today.Month == 4 && !MonthlyBudgets.instance.jokeSeen && HighLogic.CurrentGame.Mode == Game.Modes.CAREER) showGUI = true;
         }
 
         public void OnGUI()

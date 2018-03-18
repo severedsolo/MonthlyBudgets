@@ -50,6 +50,8 @@ namespace MonthlyBudgets
                 decayEnabled = GUILayout.Toggle(decayEnabled, "Decay Reputation each budget?");
                 GUILayout.Label("Decay percentage");
                 if (decayEnabled) int.TryParse(GUILayout.TextField(repDecay.ToString()), out repDecay);
+                GUILayout.Label("Budget Interval");
+                float.TryParse(GUILayout.TextField(friendlyInterval.ToString()), out friendlyInterval);
                 GUILayout.Label("Budget Multiplier");
                 int.TryParse(GUILayout.TextField(multiplier.ToString()), out multiplier);
                 GUILayout.Label("Unassigned Kerbal Wages (at experience level 1)");

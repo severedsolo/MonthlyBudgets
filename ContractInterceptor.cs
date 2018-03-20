@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using Contracts;
-using System;
+using System.Linq;
 
 namespace MonthlyBudgets
 {
@@ -40,11 +40,19 @@ namespace MonthlyBudgets
         private void onOffered(Contract contract)
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !disableContracts) return;
-            if (!(contract.FundsCompletion > 0)) return;
-            int rep = (int)((contract.FundsAdvance / 10000*-1) - (int)contract.FundsFailure/10000);
+            if (contract.FundsCompletion <= 0) return;
+            float rep = ((float)contract.FundsAdvance / 10000 * -1) - ((float)contract.FundsFailure / 10000);
             contract.FundsFailure = 0;
             contract.ReputationFailure = rep - contract.ReputationFailure;
-            rep = (int)((contract.FundsAdvance / 10000) + (contract.FundsCompletion / 10000));
+            rep = ((float)contract.FundsAdvance / 10000) + ((float)contract.FundsCompletion / 10000);
+
+            for (int i = 0; i < contract.AllParameters.Count(); i++)
+            {
+                ContractParameter p = contract.AllParameters.ElementAt(i);
+                rep = rep + ((float)p.FundsCompletion / 10000);
+                p.FundsCompletion = 0;
+            }
+
             contract.ReputationCompletion = contract.ReputationCompletion + rep;
             if (contract.ReputationCompletion < 1) contract.ReputationCompletion = 1;
             contract.FundsAdvance = 0;

@@ -45,6 +45,7 @@ namespace MonthlyBudgets
                     }
                     costs = CostCalculate(true);
                     offsetFunds = funds - costs;
+                    if (offsetFunds < 0) offsetFunds = 0;
                 }
                 float rep = Reputation.CurrentRep;
                 double budget = (rep * BudgetSettings.instance.multiplier) - costs;

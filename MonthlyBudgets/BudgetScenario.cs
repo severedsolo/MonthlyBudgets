@@ -30,6 +30,12 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("FirstRun", BudgetSettings.instance.firstRun, true);
             savedNode.SetValue("RnD", MonthlyBudgets.instance.researchBudget, true);
             savedNode.SetValue("JokeSeen", MonthlyBudgets.instance.jokeSeen, true);
+            savedNode.SetValue("BuildingCostsEnabled", BudgetSettings.instance.buildingCostsEnabled, true);
+            savedNode.SetValue("BuildingCosts", BudgetSettings.instance.buildingCosts, true);
+            savedNode.SetValue("LaunchCostsEnabled", BudgetSettings.instance.launchCostsEnabled, true);
+            savedNode.SetValue("LaunchCostsVAB", BudgetSettings.instance.launchCostsVAB, true);
+            savedNode.SetValue("LaunchCostsSPH", BudgetSettings.instance.launchCostsSPH, true);
+            savedNode.SetValue("LaunchCosts", MonthlyBudgets.instance.launchCosts, true);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -52,6 +58,12 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             node.TryGetValue("FirstRun", ref BudgetSettings.instance.firstRun);
             node.TryGetValue("RnD", ref MonthlyBudgets.instance.researchBudget);
             node.TryGetValue("JokeSeen", ref MonthlyBudgets.instance.jokeSeen);
+            node.TryGetValue("BuildingCostsEnabled", ref BudgetSettings.instance.buildingCostsEnabled);
+            node.TryGetValue("BuildingCosts", ref BudgetSettings.instance.buildingCosts);
+            node.TryGetValue("LaunchCostsEnabled", ref BudgetSettings.instance.launchCostsEnabled);
+            node.TryGetValue("LaunchCostsVAB", ref BudgetSettings.instance.launchCostsVAB);
+            node.TryGetValue("LaunchCostsSPH", ref BudgetSettings.instance.launchCostsSPH);
+            node.TryGetValue("LaunchCosts", ref MonthlyBudgets.instance.launchCosts);
             MonthlyBudgets.instance.inputString = MonthlyBudgets.instance.emergencyBudgetPercentage.ToString();
             if (BudgetSettings.instance.firstRun) BudgetSettings.instance.FirstRun();
         }

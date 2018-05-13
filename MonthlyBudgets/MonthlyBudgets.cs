@@ -25,6 +25,8 @@ namespace MonthlyBudgets
         public string inputString;
         public float researchBudget = 0;
         public bool jokeSeen = false;
+        private SpaceCenterFacility[] facilities;
+        public int launchCosts = 0;
 
 
         private void Budget(double timeSinceLastUpdate)
@@ -44,6 +46,11 @@ namespace MonthlyBudgets
                         Debug.Log("[MonthlyBudgets]: " + funds + "remaining, " + penalty + " reputation removed");
                     }
                     costs = CostCalculate(true);
+                    if (BudgetSettings.instance.launchCostsEnabled)
+                    {
+                        costs += launchCosts;
+                        launchCosts = 0;
+                    }
                     offsetFunds = funds - costs;
                     if (offsetFunds < 0) offsetFunds = 0;
                 }
@@ -123,6 +130,15 @@ namespace MonthlyBudgets
         {
             KACWrapper.InitKACWrapper();
             PopulateHomeWorldData();
+            facilities = (SpaceCenterFacility[])Enum.GetValues(typeof(SpaceCenterFacility));
+            GameEvents.OnVesselRollout.Add(OnVesselRollout);
+        }
+
+        private void OnVesselRollout(ShipConstruct ship)
+        {
+            if (!BudgetSettings.instance.launchCostsEnabled) return;
+            if (ship.shipFacility == EditorFacility.VAB) launchCosts += BudgetSettings.instance.launchCostsVAB;
+            else launchCosts += BudgetSettings.instance.launchCostsSPH;
         }
 
         void Update()
@@ -179,11 +195,21 @@ namespace MonthlyBudgets
                 float wages = 0;
                 if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) wages = level * BudgetSettings.instance.availableWages;
                 if (p.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) wages = level * BudgetSettings.instance.assignedWages;
-                budget = budget + (int)wages;
+                budget += (int)wages;
             }
             IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown && v.vesselType != VesselType.EVA);
-            int vesselBudget = vessels.Count() * BudgetSettings.instance.vesselCost;
-            budget = budget + vesselBudget;
+            budget += vessels.Count() * BudgetSettings.instance.vesselCost;
+            if(BudgetSettings.instance.buildingCostsEnabled)
+            {
+                for(int i = 0; i<facilities.Count(); i++)
+                {
+                    SpaceCenterFacility facility = facilities.ElementAt(i);
+                    if (facility == SpaceCenterFacility.LaunchPad || facility == SpaceCenterFacility.Runway) continue;
+                    int lvl = (int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
+                    budget += lvl * BudgetSettings.instance.buildingCosts;
+                }
+                if (HighLogic.CurrentGame.Parameters.Difficulty.AllowOtherLaunchSites) budget += (2 * BudgetSettings.instance.buildingCosts);
+            }
             if (log)
             {
                 Debug.Log("[MonthlyBudgets]: Expenses are " + budget);
@@ -224,7 +250,7 @@ namespace MonthlyBudgets
             }
             if (HomeWorld == null) PopulateHomeWorldData();
             int costs = CostCalculate(false);
-            int estimatedBudget = (int)Reputation.CurrentRep * BudgetSettings.instance.multiplier;
+            double estimatedBudget = Math.Round(Reputation.CurrentRep * BudgetSettings.instance.multiplier,0);
             if (estimatedBudget < 0)
             {
                 estimatedBudget = 0;
@@ -242,6 +268,7 @@ namespace MonthlyBudgets
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
+            if (BudgetSettings.instance.launchCostsEnabled) GUILayout.Label("Launch Costs: " + launchCosts);
             GUILayout.Label("Percentage of budget dedicated to R&D");
             if (!float.TryParse(GUILayout.TextField(researchBudget.ToString()), out researchBudget) || researchBudget <0 || researchBudget >100) researchBudget = 0;
             enableEmergencyBudget = GUILayout.Toggle(enableEmergencyBudget, "Enable Big Project Fund");

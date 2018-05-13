@@ -23,7 +23,7 @@ namespace MonthlyBudgets
         public bool firstRun = true;
         public bool showGUI = false;
         public bool buildingCostsEnabled = true;
-        public int buildingCosts = 428;
+        public int buildingCosts = 476;
         public bool launchCostsEnabled = true;
         public int launchCostsVAB = 1000;
         public int launchCostsSPH = 100;
@@ -70,22 +70,22 @@ namespace MonthlyBudgets
                 int.TryParse(GUILayout.TextField(multiplier.ToString()), out multiplier);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Unassigned Kerbal Wages (at experience level 1)");
+                GUILayout.Label("Unassigned Kerbal Wages (at experience level 1):");
                 int.TryParse(GUILayout.TextField(availableWages.ToString()), out availableWages);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Assigned Kerbal Wages (at experience level 1");
+                GUILayout.Label("Assigned Kerbal Wages (at experience level 1):");
                 int.TryParse(GUILayout.TextField(assignedWages.ToString()), out assignedWages);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Monthly cost per active vessel");
+                GUILayout.Label("Monthly cost per active vessel:");
                 int.TryParse(GUILayout.TextField(vesselCost.ToString()), out vesselCost);
                 GUILayout.EndHorizontal();
                 buildingCostsEnabled = GUILayout.Toggle(buildingCostsEnabled, "Enable maintenance costs for buildings?");
                 if (buildingCostsEnabled)
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label("Monthly Cost Per Building at Lv 1:");
+                    GUILayout.Label("Base Cost Per Building:");
                     int.TryParse(GUILayout.TextField(buildingCosts.ToString()), out buildingCosts);
                     GUILayout.EndHorizontal();
                 }
@@ -93,11 +93,11 @@ namespace MonthlyBudgets
                 if (launchCostsEnabled)
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label("Cost Per Launch (VAB):");
+                    GUILayout.Label("Base Cost Per Launch (VAB):");
                     int.TryParse(GUILayout.TextField(launchCostsVAB.ToString()), out launchCostsVAB);
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label("Cost Per Launch (SPH):");
+                    GUILayout.Label("Base Cost Per Launch (SPH):");
                     int.TryParse(GUILayout.TextField(launchCostsSPH.ToString()), out launchCostsSPH);
                     GUILayout.EndHorizontal();
                 }

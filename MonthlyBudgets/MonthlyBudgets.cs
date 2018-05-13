@@ -137,8 +137,8 @@ namespace MonthlyBudgets
         private void OnVesselRollout(ShipConstruct ship)
         {
             if (!BudgetSettings.instance.launchCostsEnabled) return;
-            if (ship.shipFacility == EditorFacility.VAB) launchCosts += BudgetSettings.instance.launchCostsVAB;
-            else launchCosts += BudgetSettings.instance.launchCostsSPH;
+            if (ship.shipFacility == EditorFacility.VAB) launchCosts += BudgetSettings.instance.launchCostsVAB * ((int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.LaunchPad) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility.LaunchPad)) + 1);
+            else launchCosts += BudgetSettings.instance.launchCostsSPH * ((int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.Runway) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility.Runway)) + 1);
         }
 
         void Update()
@@ -268,7 +268,7 @@ namespace MonthlyBudgets
             GUILayout.Label("Next Budget Due: Y " + year + " D " + day);
             GUILayout.Label("Estimated Budget: $" + estimatedBudget);
             GUILayout.Label("Current Costs: $" + costs);
-            if (BudgetSettings.instance.launchCostsEnabled) GUILayout.Label("Launch Costs: " + launchCosts);
+            if (BudgetSettings.instance.launchCostsEnabled) GUILayout.Label("Launch Costs: $" + launchCosts);
             GUILayout.Label("Percentage of budget dedicated to R&D");
             if (!float.TryParse(GUILayout.TextField(researchBudget.ToString()), out researchBudget) || researchBudget <0 || researchBudget >100) researchBudget = 0;
             enableEmergencyBudget = GUILayout.Toggle(enableEmergencyBudget, "Enable Big Project Fund");

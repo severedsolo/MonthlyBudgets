@@ -21,6 +21,7 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("ContractInterceptor", BudgetSettings.instance.contractInterceptor, true);
             savedNode.SetValue("CoverCosts", BudgetSettings.instance.coverCosts, true);
             savedNode.SetValue("StopTimeWarp", BudgetSettings.instance.stopTimewarp, true);
+            savedNode.SetValue("DecayEnabled", BudgetSettings.instance.decayEnabled, true);
             savedNode.SetValue("RepDecay", BudgetSettings.instance.repDecay, true);
             savedNode.SetValue("Multiplier", BudgetSettings.instance.multiplier, true);
             savedNode.SetValue("FriendlyInterval", BudgetSettings.instance.friendlyInterval, true);
@@ -49,6 +50,7 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             node.TryGetValue("ContractInterceptor", ref BudgetSettings.instance.contractInterceptor);
             node.TryGetValue("CoverCosts", ref BudgetSettings.instance.coverCosts);
             node.TryGetValue("StopTimeWarp", ref BudgetSettings.instance.stopTimewarp);
+            node.TryGetValue("DecayEnabled", ref BudgetSettings.instance.decayEnabled);
             node.TryGetValue("RepDecay", ref BudgetSettings.instance.repDecay);
             node.TryGetValue("Multiplier", ref BudgetSettings.instance.multiplier);
             node.TryGetValue("FriendlyInterval", ref BudgetSettings.instance.friendlyInterval);

@@ -122,6 +122,7 @@ namespace MonthlyBudgets
             bool.TryParse(settings.GetValue("coverCosts"), out coverCosts);
             bool.TryParse(settings.GetValue("stopTimewarp"), out stopTimewarp);
             bool.TryParse(settings.GetValue("decayEnabled"), out decayEnabled);
+            float.TryParse(settings.GetValue("friendlyInternal"), out friendlyInterval);
             int.TryParse(settings.GetValue("repDecay"), out repDecay);
             int.TryParse(settings.GetValue("multiplier"), out multiplier);
             int.TryParse(settings.GetValue("availableWages"), out availableWages);

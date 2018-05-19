@@ -63,3 +63,5 @@ obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.mdb
+*.ide
+MonthlyBudgets/obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt

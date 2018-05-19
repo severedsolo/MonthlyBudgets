@@ -14,4 +14,4 @@ C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBud
 C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.csproj.CopyComplete
 C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.dll
 C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.pdb
-C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.csprojResolveAssemblyReference.cache
+C:\Users\evilp\source\repos\MonthlyBudgets\MonthlyBudgets\obj\Release\MonthlyBudgets.csprojAssemblyReference.cache

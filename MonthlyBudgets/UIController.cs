@@ -16,6 +16,7 @@ namespace MonthlyBudgets
 
         void Awake()
         {
+            DontDestroyOnLoad(this);
             GameEvents.onGUIApplicationLauncherReady.Add(GUIReady);
             GameEvents.onGameSceneSwitchRequested.Add(onGameSceneSwitchRequested);
         }

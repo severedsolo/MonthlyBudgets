@@ -9,6 +9,7 @@ namespace MonthlyBudgets
     class BudgetSettings : MonoBehaviour
     {
         public static BudgetSettings instance;
+        public bool upgraded = false;
         public bool masterSwitch = true;
         public bool hardMode = false;
         public bool decayEnabled = false;
@@ -20,13 +21,20 @@ namespace MonthlyBudgets
         public float friendlyInterval = 30;
         public int availableWages = 1000;
         public int assignedWages = 2000;
-        public int vesselCost = 5000;
+        public int vesselCost = 1000;
         public bool firstRun = true;
         public bool buildingCostsEnabled = true;
-        public int buildingCosts = 476;
         public bool launchCostsEnabled = true;
         public int launchCostsVAB = 1000;
         public int launchCostsSPH = 100;
+        public int sphCost = 8000;
+        public int missionControlCost = 6000;
+        public int astronautComplexCost = 2000;
+        public int administrationCost = 4000;
+        public int vabCost = 8000;
+        public int trackingStationCost = 4000;
+        public int rndCost = 8000;
+        public int otherFacilityCost = 5000;
         PopupDialog settingsDialog;
         bool page1 = true;
         Rect geometry = new Rect(0.5f, 0.5f, 300, 300);
@@ -85,8 +93,29 @@ namespace MonthlyBudgets
                     dialog.Add(new DialogGUIHorizontalLayout(horizontal));
                     if (buildingCostsEnabled)
                     {
-                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost Per Building: $" + buildingCosts; }, false, false);
-                        horizontal[1] = new DialogGUISlider(delegate { return buildingCosts; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { buildingCosts = (int)newValue; });
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for SPH: $" + sphCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return sphCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { sphCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for Mission Control: $" + missionControlCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return missionControlCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { missionControlCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for Astronaut Complex: $" + astronautComplexCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return astronautComplexCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { astronautComplexCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for Administration: $" + administrationCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return administrationCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { administrationCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for VAB: $" + vabCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return vabCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { vabCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for Tracking Station: $" + trackingStationCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return trackingStationCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { trackingStationCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for R&D: $" + rndCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return rndCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { rndCost = (int)newValue; });
+                        dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                        horizontal[0] = new DialogGUILabel(delegate { return "Base Cost for Other Facilities (non-stock): $" + otherFacilityCost; }, false, false);
+                        horizontal[1] = new DialogGUISlider(delegate { return otherFacilityCost; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { otherFacilityCost = (int)newValue; });
                         dialog.Add(new DialogGUIHorizontalLayout(horizontal));
                     }
                     if (launchCostsEnabled)
@@ -122,7 +151,7 @@ namespace MonthlyBudgets
 
         public void SpawnSettingsDialog()
         {
-                if (settingsDialog == null) settingsDialog = GenerateDialog();
+            if (settingsDialog == null) settingsDialog = GenerateDialog();
         }
 
         void CloseDialog()
@@ -132,6 +161,28 @@ namespace MonthlyBudgets
             settingsDialog.Dismiss();
         }
 
+        public int ReturnBuildingCosts(SpaceCenterFacility facility)
+        {
+            switch(facility)
+            {
+                case SpaceCenterFacility.Administration:
+                    return administrationCost;
+                case SpaceCenterFacility.AstronautComplex:
+                    return astronautComplexCost;
+                case SpaceCenterFacility.MissionControl:
+                    return missionControlCost;
+                case SpaceCenterFacility.ResearchAndDevelopment:
+                    return rndCost;
+                case SpaceCenterFacility.SpaceplaneHangar:
+                    return sphCost;
+                case SpaceCenterFacility.TrackingStation:
+                    return trackingStationCost;
+                case SpaceCenterFacility.VehicleAssemblyBuilding:
+                    return vabCost;
+                default:
+                    return otherFacilityCost;
+            }
+        }
         public void FirstRun()
         {
             firstRun = false;;
@@ -150,10 +201,18 @@ namespace MonthlyBudgets
             int.TryParse(settings.GetValue("assignedWages"), out assignedWages);
             int.TryParse(settings.GetValue("vesselCost"), out vesselCost);
             bool.TryParse(settings.GetValue("buildingCostsEnabled"), out buildingCostsEnabled);
-            int.TryParse(settings.GetValue("buildingCosts"), out buildingCosts);
             bool.TryParse(settings.GetValue("launchCostsEnabled"), out launchCostsEnabled);
             int.TryParse(settings.GetValue("launchCostsVAB"), out launchCostsVAB);
             int.TryParse(settings.GetValue("launchCostsSPH"), out launchCostsSPH);
+            int.TryParse(settings.GetValue("sphCost"), out sphCost);
+            int.TryParse(settings.GetValue("missionControlCost"), out missionControlCost);
+            int.TryParse(settings.GetValue("astronautComplexCost"), out astronautComplexCost);
+            int.TryParse(settings.GetValue("administrationCost"), out administrationCost);
+            int.TryParse(settings.GetValue("vabCost"), out vabCost);
+            int.TryParse(settings.GetValue("trackingStationCost"), out trackingStationCost);
+            int.TryParse(settings.GetValue("rndCost"), out rndCost);
+            int.TryParse(settings.GetValue("otherFacilityCost"), out otherFacilityCost);
+            upgraded = true;
             SpawnSettingsDialog();
         }
     }

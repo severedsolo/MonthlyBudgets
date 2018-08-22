@@ -198,20 +198,27 @@ namespace MonthlyBudgets
             budget += vessels.Count() * BudgetSettings.instance.vesselCost;
             if (BudgetSettings.instance.buildingCostsEnabled)
             {
-                for (int i = 0; i < facilities.Count(); i++)
-                {
-                    SpaceCenterFacility facility = facilities.ElementAt(i);
-                    if (facility == SpaceCenterFacility.LaunchPad || facility == SpaceCenterFacility.Runway) continue;
-                    int lvl = (int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
-                    budget += lvl * BudgetSettings.instance.buildingCosts;
-                }
-                if (HighLogic.CurrentGame.Parameters.Difficulty.AllowOtherLaunchSites) budget += (2 * BudgetSettings.instance.buildingCosts);
+                budget += GetBuildingCosts();
             }
             if (log)
             {
                 Debug.Log("[MonthlyBudgets]: Expenses are " + budget);
             }
             return budget;
+        }
+
+        public int GetBuildingCosts()
+        {
+            int cost = 0;
+            for (int i = 0; i < facilities.Count(); i++)
+            {
+                SpaceCenterFacility facility = facilities.ElementAt(i);
+                if (facility == SpaceCenterFacility.LaunchPad || facility == SpaceCenterFacility.Runway) continue;
+                int lvl = (int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
+                cost += lvl * BudgetSettings.instance.ReturnBuildingCosts(facility);
+            }
+            if (HighLogic.CurrentGame.Parameters.Difficulty.AllowOtherLaunchSites) cost += (2 * cost);
+            return cost;
         }
 
     }

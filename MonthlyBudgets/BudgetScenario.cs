@@ -32,11 +32,19 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("RnD", MonthlyBudgets.instance.researchBudget, true);
             savedNode.SetValue("JokeSeen", MonthlyBudgets.instance.jokeSeen, true);
             savedNode.SetValue("BuildingCostsEnabled", BudgetSettings.instance.buildingCostsEnabled, true);
-            savedNode.SetValue("BuildingCosts", BudgetSettings.instance.buildingCosts, true);
+            savedNode.SetValue("sphCost", BudgetSettings.instance.sphCost, true);
+            savedNode.SetValue("missionControlCost", BudgetSettings.instance.missionControlCost, true);
+            savedNode.SetValue("astronautComplexCost", BudgetSettings.instance.astronautComplexCost, true);
+            savedNode.SetValue("administrationCost", BudgetSettings.instance.administrationCost, true);
+            savedNode.SetValue("vabCost", BudgetSettings.instance.vabCost, true);
+            savedNode.SetValue("trackingStationCost", BudgetSettings.instance.trackingStationCost, true);
+            savedNode.SetValue("rndCost", BudgetSettings.instance.rndCost, true);
+            savedNode.SetValue("ohterFacilityCost", BudgetSettings.instance.otherFacilityCost, true);
             savedNode.SetValue("LaunchCostsEnabled", BudgetSettings.instance.launchCostsEnabled, true);
             savedNode.SetValue("LaunchCostsVAB", BudgetSettings.instance.launchCostsVAB, true);
             savedNode.SetValue("LaunchCostsSPH", BudgetSettings.instance.launchCostsSPH, true);
             savedNode.SetValue("LaunchCosts", MonthlyBudgets.instance.launchCosts, true);
+            savedNode.SetValue("upgraded", BudgetSettings.instance.upgraded, true);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -61,13 +69,21 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             node.TryGetValue("RnD", ref MonthlyBudgets.instance.researchBudget);
             node.TryGetValue("JokeSeen", ref MonthlyBudgets.instance.jokeSeen);
             node.TryGetValue("BuildingCostsEnabled", ref BudgetSettings.instance.buildingCostsEnabled);
-            node.TryGetValue("BuildingCosts", ref BudgetSettings.instance.buildingCosts);
+            node.TryGetValue("sphCost", ref BudgetSettings.instance.sphCost);
+            node.TryGetValue("missionControlCost", ref BudgetSettings.instance.missionControlCost);
+            node.TryGetValue("astronautComplexCost", ref BudgetSettings.instance.astronautComplexCost);
+            node.TryGetValue("administrationCost", ref BudgetSettings.instance.administrationCost);
+            node.TryGetValue("vabCost", ref BudgetSettings.instance.vabCost);
+            node.TryGetValue("trackingStationCost", ref BudgetSettings.instance.trackingStationCost);
+            node.TryGetValue("rndCost", ref BudgetSettings.instance.rndCost);
+            node.TryGetValue("otherFacilityCost", ref BudgetSettings.instance.otherFacilityCost);
             node.TryGetValue("LaunchCostsEnabled", ref BudgetSettings.instance.launchCostsEnabled);
             node.TryGetValue("LaunchCostsVAB", ref BudgetSettings.instance.launchCostsVAB);
             node.TryGetValue("LaunchCostsSPH", ref BudgetSettings.instance.launchCostsSPH);
+            node.TryGetValue("upgraded", ref BudgetSettings.instance.upgraded);
             node.TryGetValue("LaunchCosts", ref MonthlyBudgets.instance.launchCosts);
             MonthlyBudgets.instance.inputString = MonthlyBudgets.instance.emergencyBudgetPercentage.ToString();
-            if (BudgetSettings.instance.firstRun) BudgetSettings.instance.FirstRun();
+            if (BudgetSettings.instance.firstRun || !BudgetSettings.instance.upgraded) BudgetSettings.instance.FirstRun();
         }
     }
 }

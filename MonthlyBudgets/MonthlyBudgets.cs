@@ -217,7 +217,6 @@ namespace MonthlyBudgets
                 int lvl = (int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
                 cost += lvl * BudgetSettings.instance.ReturnBuildingCosts(facility);
             }
-            if (HighLogic.CurrentGame.Parameters.Difficulty.AllowOtherLaunchSites) cost += (2 * cost);
             return cost;
         }
 

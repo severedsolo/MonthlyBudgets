@@ -16,10 +16,10 @@ namespace MonthlyBudgets
         public bool enableEmergencyBudget;
         public double emergencyBudget = 0;
         bool timeDiscrepancyLog = true;
-        public string inputString;
         public float researchBudget = 0;
         public bool jokeSeen = false;
         public int launchCosts = 0;
+        public string inputString;
         public CelestialBody HomeWorld;
         public double yearLength;
         public double dayLength;
@@ -120,12 +120,27 @@ namespace MonthlyBudgets
             if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             instance = this;
         }
+
         void Start()
         {
             KACWrapper.InitKACWrapper();
             PopulateHomeWorldData();
             facilities = (SpaceCenterFacility[])Enum.GetValues(typeof(SpaceCenterFacility));
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
+            GameEvents.onGameSceneSwitchRequested.Add(SceneSwitch);
+        }
+
+        private void SceneSwitch(GameEvents.FromToAction<GameScenes, GameScenes> scenes)
+        {
+            if (scenes.to != GameScenes.MAINMENU) return;
+            lastUpdate = 0;
+            emergencyBudgetPercentage = 10;
+            enableEmergencyBudget = false;
+            emergencyBudget = 0;
+            timeDiscrepancyLog = true;
+            researchBudget = 0;
+            jokeSeen = false;
+            launchCosts = 0;
         }
 
         public void PopulateHomeWorldData()

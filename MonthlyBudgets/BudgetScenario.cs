@@ -10,8 +10,11 @@ namespace MonthlyBudgets
 GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
     class BudgetScenario : ScenarioModule
     {
+        private const string currentVersion = "4.8";
+        private string saveGameVersion = "0.0";
         public override void OnSave(ConfigNode savedNode)
         {
+            savedNode.SetValue("saveGameVersion", currentVersion, true);
             savedNode.SetValue("LastBudgetUpdate", MonthlyBudgets.instance.lastUpdate, true);
             savedNode.SetValue("EmergencyFund", MonthlyBudgets.instance.emergencyBudget, true);
             savedNode.SetValue("EmergencyFundPercent", MonthlyBudgets.instance.emergencyBudgetPercentage, true);
@@ -39,16 +42,19 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             savedNode.SetValue("vabCost", BudgetSettings.instance.vabCost, true);
             savedNode.SetValue("trackingStationCost", BudgetSettings.instance.trackingStationCost, true);
             savedNode.SetValue("rndCost", BudgetSettings.instance.rndCost, true);
-            savedNode.SetValue("ohterFacilityCost", BudgetSettings.instance.otherFacilityCost, true);
+            savedNode.SetValue("otherFacilityCost", BudgetSettings.instance.otherFacilityCost, true);
             savedNode.SetValue("LaunchCostsEnabled", BudgetSettings.instance.launchCostsEnabled, true);
             savedNode.SetValue("LaunchCostsVAB", BudgetSettings.instance.launchCostsVAB, true);
             savedNode.SetValue("LaunchCostsSPH", BudgetSettings.instance.launchCostsSPH, true);
             savedNode.SetValue("LaunchCosts", MonthlyBudgets.instance.launchCosts, true);
+            savedNode.SetValue("kerbalDeathPenalty", BudgetSettings.instance.kerbalDeathPenalty, true);
+            savedNode.SetValue("vesselDeathPenalty", BudgetSettings.instance.vesselDeathPenalty, true);
             savedNode.SetValue("upgraded", BudgetSettings.instance.upgraded, true);
         }
 
         public override void OnLoad(ConfigNode node)
         {
+            node.TryGetValue("saveGameVersion", ref saveGameVersion);
             node.TryGetValue("LastBudgetUpdate", ref MonthlyBudgets.instance.lastUpdate);
             node.TryGetValue("EmergencyFund", ref MonthlyBudgets.instance.emergencyBudget);
             node.TryGetValue("EmergencyFundPercent", ref MonthlyBudgets.instance.emergencyBudgetPercentage);
@@ -82,6 +88,12 @@ GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
             node.TryGetValue("LaunchCostsSPH", ref BudgetSettings.instance.launchCostsSPH);
             node.TryGetValue("upgraded", ref BudgetSettings.instance.upgraded);
             node.TryGetValue("LaunchCosts", ref MonthlyBudgets.instance.launchCosts);
+            //TODO: REMOVE THIS WHEN ANY FURTHER SETTING CHANGES HAPPEN
+            if (saveGameVersion == "4.8")
+            {
+                node.TryGetValue("kerbalDeathPenalty", ref BudgetSettings.instance.kerbalDeathPenalty);
+                node.TryGetValue("vesselDeathPenalty", ref BudgetSettings.instance.vesselDeathPenalty);
+            }
             MonthlyBudgets.instance.inputString = MonthlyBudgets.instance.emergencyBudgetPercentage.ToString();
             if (BudgetSettings.instance.firstRun || !BudgetSettings.instance.upgraded) BudgetSettings.instance.FirstRun();
         }

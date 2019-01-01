@@ -35,11 +35,13 @@ namespace MonthlyBudgets
         public int trackingStationCost = 4000;
         public int rndCost = 8000;
         public int otherFacilityCost = 5000;
-        PopupDialog settingsDialog;
-        bool page1 = true;
-        Rect geometry = new Rect(0.5f, 0.5f, 300, 300);
-        string savedFile;
-        void Awake()
+        public int vesselDeathPenalty = 15;
+        public int kerbalDeathPenalty = 10;
+        private PopupDialog settingsDialog;
+        private bool page1 = true;
+        private Rect geometry = new Rect(0.5f, 0.5f, 300, 300);
+        private string savedFile;
+        private  void Awake()
         {
             instance = this;
             DontDestroyOnLoad(this);
@@ -127,6 +129,12 @@ namespace MonthlyBudgets
                         horizontal[1] = new DialogGUISlider(delegate { return launchCostsVAB; }, 0.0f, 10000.0f, true, 280.0f, 30.0f, (float newValue) => { launchCostsVAB = (int)newValue; });
                         dialog.Add(new DialogGUIHorizontalLayout(horizontal));
                     }
+                    horizontal[0] = new DialogGUILabel(delegate { return "Crewed Vessel Loss Penalty " + vesselDeathPenalty; }, false, false);
+                    horizontal[1] = new DialogGUISlider(delegate { return vesselDeathPenalty; }, 0.0f, 100f, true, 280.0f, 30.0f, newValue => { vesselDeathPenalty = (int)newValue; });
+                    dialog.Add(new DialogGUIHorizontalLayout(horizontal));
+                    horizontal[0] = new DialogGUILabel(delegate { return "Per Kerbal Death Penalty " + kerbalDeathPenalty; }, false, false);
+                    horizontal[1] = new DialogGUISlider(delegate { return kerbalDeathPenalty; }, 0.0f, 100f, true, 280.0f, 30.0f, newValue => { kerbalDeathPenalty = (int)newValue; });
+                    dialog.Add(new DialogGUIHorizontalLayout(horizontal));
                 }
             }
             horizontal[0] = new DialogGUIButton("Switch Page", () => SwitchPage(), false);
@@ -212,6 +220,8 @@ namespace MonthlyBudgets
             int.TryParse(settings.GetValue("trackingStationCost"), out trackingStationCost);
             int.TryParse(settings.GetValue("rndCost"), out rndCost);
             int.TryParse(settings.GetValue("otherFacilityCost"), out otherFacilityCost);
+            int.TryParse(settings.GetValue("kerbalDeathPenalty"), out kerbalDeathPenalty);
+            int.TryParse(settings.GetValue("vesselDeathPenalty"), out vesselDeathPenalty);
             upgraded = true;
             SpawnSettingsDialog();
         }

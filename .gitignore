@@ -65,3 +65,4 @@ obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.mdb
 *.ide
 MonthlyBudgets/obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
+MonthlyBudgets/bin/Release/PartDatabase.cfg

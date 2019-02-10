@@ -37,14 +37,18 @@ namespace MonthlyBudgets
             return "Next Budget Due: Y " + year + " D " + day;
         }
 
-        string EstimateBudget()
+        string EstimateBudget(bool gross)
         {
             double estimatedBudget = Math.Round(Reputation.CurrentRep * BudgetSettings.instance.multiplier, 0);
             if (estimatedBudget < 0)
             {
                 estimatedBudget = 0;
             }
-            return "Estimated Budget $:" + estimatedBudget;
+            if (gross) return "Estimated Gross Budget $:" + estimatedBudget;
+            double netBudget = Math.Round(estimatedBudget - MonthlyBudgets.instance.CostCalculate(false) - MonthlyBudgets.instance.launchCosts,0);
+            if (netBudget < 0) netBudget = 0;
+            return "Estimated Net Budget $:" + netBudget;
+
         }
 
         //LEGACY - Keep it here so we can see what we need to add.
@@ -58,9 +62,10 @@ namespace MonthlyBudgets
             else
             {
                 dialog.Add(new DialogGUILabel(() => GetNextUpdate(), false, false));
-                dialog.Add(new DialogGUILabel(() => EstimateBudget(), false, false));
+                dialog.Add(new DialogGUILabel(() => EstimateBudget(true), false, false));
                 dialog.Add(new DialogGUILabel(delegate { return "Current Costs: $" + MonthlyBudgets.instance.CostCalculate(false); }, false, false));
                 if (BudgetSettings.instance.launchCostsEnabled) dialog.Add(new DialogGUILabel(delegate { return "Launch Costs: $" + MonthlyBudgets.instance.launchCosts; }, false, false));
+                dialog.Add(new DialogGUILabel(() => EstimateBudget(false), false, false));
                 dialog.Add(new DialogGUILabel(delegate { return "Research Budget: " + MonthlyBudgets.instance.researchBudget + "%"; }, false, false));
                 dialog.Add(new DialogGUISlider(delegate { return MonthlyBudgets.instance.researchBudget; }, 0.0f, 100.0f, true, 140.0f, 30.0f, (float newValue) => { MonthlyBudgets.instance.researchBudget = newValue; }));
                 dialog.Add(new DialogGUIToggle(() => MonthlyBudgets.instance.enableEmergencyBudget, "Enable Big Project Fund", (bool b) => { MonthlyBudgets.instance.enableEmergencyBudget = b; }));

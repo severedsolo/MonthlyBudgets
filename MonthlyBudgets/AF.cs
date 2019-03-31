@@ -46,7 +46,7 @@ namespace MonthlyBudgets
                     Funding.Instance.AddFunds(-Funding.Instance.Funds,TransactionReasons.None);
                     firstWindow = false;
                     showGUI = false;
-                    Invoke("AprilFool", 5.0f);
+                    Invoke("AprilFool", 30.0f);
                 }
                 if (GUILayout.Button("Bah! I reject their empty threats"))
                 {
@@ -69,7 +69,7 @@ namespace MonthlyBudgets
                 {
                     showGUI = false;
                     secondWindow = false;
-                    Invoke("AprilFool", 5.0f);
+                    Invoke("AprilFool", 30.0f);
                 }
             }
             if(finalWindow)

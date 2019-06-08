@@ -110,7 +110,7 @@ namespace MonthlyBudgets
             }
             catch
             {
-                Debug.Log("[MonthlyBudgets]: Problem calculating the budget");
+                if(HighLogic.LoadedScene != GameScenes.MAINMENU) Debug.Log("[MonthlyBudgets]: Problem calculating the budget");
             }
         }
 

@@ -18,6 +18,8 @@ namespace MonthlyBudgets
         public bool coverCosts;
         public bool decayEnabled;
         public bool firstRun = true;
+        // ReSharper disable once RedundantDefaultMemberInitializer
+        public bool useItOrLoseIt = false;
         public float friendlyInterval = 30;
         private Rect _geometry = new Rect(0.5f, 0.5f, 300, 300);
         public bool hardMode;
@@ -59,6 +61,8 @@ namespace MonthlyBudgets
                 dialog.Add(new DialogGUIToggle(() => masterSwitch, "Mod Enabled", b => { ToggleMasterSwitch(); }));
                 if (masterSwitch)
                 {
+                    dialog.Add(new DialogGUIToggle(() => useItOrLoseIt, "Use it Or Lose It",
+                        b => { useItOrLoseIt = b; }));
                     dialog.Add(new DialogGUIToggle(() => hardMode, "Penalty for not spending entire budget?",
                         b => { hardMode = b; }));
                     dialog.Add(new DialogGUIToggle(() => contractInterceptor, "Contracts pay rep instead of funds?",

@@ -39,14 +39,11 @@ namespace MonthlyBudgets
 
         private static string EstimateBudget(bool gross)
         {
+            int costs = MonthlyBudgets.instance.CostCalculate(false);
             double estimatedBudget = Math.Round(Reputation.CurrentRep * BudgetSettings.instance.multiplier, 0);
-            if (estimatedBudget < 0) estimatedBudget = 0;
+            if (estimatedBudget < costs) estimatedBudget = costs*2;
             if (gross) return "Estimated Gross Budget $:" + estimatedBudget;
-            double netBudget =
-                Math.Round(
-                    estimatedBudget - MonthlyBudgets.instance.CostCalculate(false) -
-                    MonthlyBudgets.instance.launchCosts, 0);
-            if (netBudget < 0) netBudget = 0;
+            double netBudget = Math.Round(estimatedBudget - costs - MonthlyBudgets.instance.launchCosts, 0);
             return "Estimated Net Budget $:" + netBudget;
         }
 
@@ -112,7 +109,7 @@ namespace MonthlyBudgets
 
         public void GuiReady()
         {
-            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER || HighLogic.LoadedScene == GameScenes.MAINMENU) return;
+            if (HighLogic.LoadedScene == GameScenes.MAINMENU || HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
             if (_toolbarButton == null)
                 _toolbarButton = ApplicationLauncher.Instance.AddModApplication(SpawnDialog, SpawnDialog, null, null,
                     null, null, ApplicationLauncher.AppScenes.ALWAYS,

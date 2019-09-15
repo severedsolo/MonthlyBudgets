@@ -1,12 +1,18 @@
-﻿namespace MonthlyBudgets
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace MonthlyBudgets
 {
     // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
     [KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames,
         GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
     internal class BudgetScenario : ScenarioModule
     {
-        private const string CurrentVersion = "4.8";
+        private const string CurrentVersion = "4.11";
+        private const string PreviousVersion = "4.8";
         private string _saveGameVersion = "0.0";
+        private PopupDialog _errorDialog;
+        private readonly Rect _geometry = new Rect(0.5f, 0.5f, 800, 30);
 
         public override void OnSave(ConfigNode savedNode)
         {
@@ -51,6 +57,11 @@
         public override void OnLoad(ConfigNode node)
         {
             node.TryGetValue("saveGameVersion", ref _saveGameVersion);
+            if (_saveGameVersion != CurrentVersion && _saveGameVersion != PreviousVersion)
+            {
+                SpawnErrorDialog();
+                return;
+            }
             node.TryGetValue("LastBudgetUpdate", ref MonthlyBudgets.instance.lastUpdate);
             node.TryGetValue("EmergencyFund", ref MonthlyBudgets.instance.emergencyBudget);
             node.TryGetValue("EmergencyFundPercent", ref MonthlyBudgets.instance.emergencyBudgetPercentage);
@@ -84,14 +95,38 @@
             node.TryGetValue("LaunchCostsSPH", ref BudgetSettings.instance.launchCostsSph);
             node.TryGetValue("upgraded", ref BudgetSettings.instance.upgraded);
             node.TryGetValue("LaunchCosts", ref MonthlyBudgets.instance.launchCosts);
-            //TODO: REMOVE THIS WHEN ANY FURTHER SETTING CHANGES HAPPEN
-            if (_saveGameVersion == "4.8")
+            node.TryGetValue("kerbalDeathPenalty", ref BudgetSettings.instance.kerbalDeathPenalty);
+            node.TryGetValue("vesselDeathPenalty", ref BudgetSettings.instance.vesselDeathPenalty);
+            if (_saveGameVersion == "4.11")
             {
-                node.TryGetValue("kerbalDeathPenalty", ref BudgetSettings.instance.kerbalDeathPenalty);
-                node.TryGetValue("vesselDeathPenalty", ref BudgetSettings.instance.vesselDeathPenalty);
+                node.TryGetValue("useItOrLoseIt", ref BudgetSettings.instance.useItOrLoseIt);
             }
             if (BudgetSettings.instance.firstRun || !BudgetSettings.instance.upgraded)
                 BudgetSettings.instance.FirstRun();
+        }
+
+        private void SpawnErrorDialog()
+        {
+            if (_errorDialog == null) _errorDialog = GenerateDialog();
+        }
+
+        private PopupDialog GenerateDialog()
+        {
+            List<DialogGUIBase> dialog = new List<DialogGUIBase>
+            {
+                new DialogGUILabel(
+                    "Couldn't detect an upgrade path for your save. Your settings have been reset to default"),
+                new DialogGUIButton("OK", ResetSettings, false)
+            };
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("ErrorDialog", "", "Monthly Budgets", UISkinManager.defaultSkin, _geometry,
+                    dialog.ToArray()), false, UISkinManager.defaultSkin);
+        }
+
+        private void ResetSettings()
+        {
+            _errorDialog.Dismiss();
+            BudgetSettings.instance.FirstRun();
         }
     }
 }

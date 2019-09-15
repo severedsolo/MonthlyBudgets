@@ -56,7 +56,7 @@ namespace MonthlyBudgets
                     }
 
                     offsetFunds = funds - costs;
-                    if (offsetFunds < costs * 2) offsetFunds = costs * 2;
+                    if (offsetFunds <0) offsetFunds = 0;
                 }
 
                 float rep = Reputation.CurrentRep;
@@ -72,9 +72,9 @@ namespace MonthlyBudgets
                         TransactionReasons.RnDs);
                     budget -= budget * (researchBudget / 100);
                 }
-
+                budget = Math.Max(budget, costs);
                 //we shouldn't take money away. If the player holds more than the budget, just don't award.
-                if (budget <= offsetFunds)
+                if (budget <= offsetFunds && BudgetSettings.instance.useItOrLoseIt)
                 {
                     ScreenMessages.PostScreenMessage("We can't justify extending your budget this month");
                     if (budget < costs || !BudgetSettings.instance.coverCosts)
@@ -106,7 +106,7 @@ namespace MonthlyBudgets
                                   "% of budget. BPF is now: " + emergencyBudget);
                     }
 
-                    Funding.Instance.AddFunds(-funds, TransactionReasons.None);
+                    if(BudgetSettings.instance.useItOrLoseIt) Funding.Instance.AddFunds(-funds, TransactionReasons.None);
                     Funding.Instance.AddFunds(budget, TransactionReasons.None);
                     ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
                     Debug.Log("[MonthlyBudgets]: Budget awarded: " + budget);
@@ -226,6 +226,7 @@ namespace MonthlyBudgets
                 if (p.type == ProtoCrewMember.KerbalType.Tourist) continue;
                 float level = p.experienceLevel;
                 if (level == 0) level = 0.5f;
+                // ReSharper disable once RedundantAssignment
                 float wages = 0;
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (p.rosterStatus)

@@ -24,7 +24,8 @@ namespace MonthlyBudgets
         public double yearLength;
         public double dayLength;
         private SpaceCenterFacility[] facilities;
-
+        //OnBudgetAwarded fires when we award a budget. Overloads are budget, costs)
+        public static EventData<double, double> OnBudgetAwarded;
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -49,7 +50,7 @@ namespace MonthlyBudgets
                         launchCosts = 0;
                     }
                     offsetFunds = funds - costs;
-                    if (offsetFunds < 0) offsetFunds = 0;
+                    if (offsetFunds < costs*2) offsetFunds = costs*2;
                 }
                 float rep = Reputation.CurrentRep;
                 double budget = (rep * BudgetSettings.instance.multiplier) - costs;
@@ -107,6 +108,7 @@ namespace MonthlyBudgets
                 {
                     TimeWarp.SetRate(0, true);
                 }
+                OnBudgetAwarded.Fire(budget, costs);
             }
             catch
             {
@@ -119,6 +121,7 @@ namespace MonthlyBudgets
             DontDestroyOnLoad(this);
             if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             instance = this;
+            OnBudgetAwarded = new EventData<double, double>("OnBudgetAwarded");
         }
 
         void Start()
@@ -128,6 +131,16 @@ namespace MonthlyBudgets
             facilities = (SpaceCenterFacility[])Enum.GetValues(typeof(SpaceCenterFacility));
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
             GameEvents.onGameSceneSwitchRequested.Add(SceneSwitch);
+            OnBudgetAwarded.Add(BudgetAwarded);
+        }
+
+        internal void BudgetAwarded(double budget, double costs)
+        {
+            if (KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
+            {
+                if (!KACWrapper.APIReady) return;
+                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength));
+            }
         }
 
         private void SceneSwitch(GameEvents.FromToAction<GameScenes, GameScenes> scenes)
@@ -180,18 +193,6 @@ namespace MonthlyBudgets
             if (timeSinceLastUpdate >= (BudgetSettings.instance.friendlyInterval * dayLength))
             {
                 Budget(timeSinceLastUpdate);
-            }
-            if (KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
-            {
-                if (!KACWrapper.APIReady) return;
-                KACWrapper.KACAPI.KACAlarmList alarms = KACWrapper.KAC.Alarms;
-                if (alarms.Count == 0) return;
-                for (int i = 0; i < alarms.Count; i++)
-                {
-                    string s = alarms[i].Name;
-                    if (s == "Next Budget") return;
-                }
-                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength));
             }
         }
 

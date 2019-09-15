@@ -222,6 +222,7 @@ namespace MonthlyBudgets
             int.TryParse(settings.GetValue("otherFacilityCost"), out otherFacilityCost);
             int.TryParse(settings.GetValue("kerbalDeathPenalty"), out kerbalDeathPenalty);
             int.TryParse(settings.GetValue("vesselDeathPenalty"), out vesselDeathPenalty);
+            MonthlyBudgets.instance.BudgetAwarded(0, 0);
             upgraded = true;
             SpawnSettingsDialog();
         }

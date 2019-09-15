@@ -2,69 +2,70 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using Debug = UnityEngine.Debug;
+// ReSharper disable All
+// ReSharper disable InvalidXmlDocComment
 
 // TODO: Change this namespace to something specific to your plugin here.
 //EG:
 // namespace MyPlugin_KACWrapper
 namespace MonthlyBudgets_KACWrapper
 {
-
     ///////////////////////////////////////////////////////////////////////////////////////////
     // BELOW HERE SHOULD NOT BE EDITED - this links to the loaded KAC module without requiring a Hard Dependancy
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
-    /// The Wrapper class to access KAC from another plugin
+    ///     The Wrapper class to access KAC from another plugin
     /// </summary>
-    public class KACWrapper
+    public class KacWrapper
     {
-        protected static System.Type KACType;
-        protected static System.Type KACAlarmType;
+        protected static Type KACType;
+        protected static Type KACAlarmType;
 
-        protected static Object actualKAC = null;
+        protected static object actualKAC;
 
         /// <summary>
-        /// This is the Kerbal Alarm Clock object
-        /// 
-        /// SET AFTER INIT
+        ///     This is the Kerbal Alarm Clock object
+        ///     SET AFTER INIT
         /// </summary>
-        public static KACAPI KAC = null;
-        /// <summary>
-        /// Whether we found the KerbalAlarmClock assembly in the loadedassemblies. 
-        /// 
-        /// SET AFTER INIT
-        /// </summary>
-        public static Boolean AssemblyExists { get { return (KACType != null); } }
-        /// <summary>
-        /// Whether we managed to hook the running Instance from the assembly. 
-        /// 
-        /// SET AFTER INIT
-        /// </summary>
-        public static Boolean InstanceExists { get { return (KAC != null); } }
-        /// <summary>
-        /// Whether we managed to wrap all the methods/functions from the instance. 
-        /// 
-        /// SET AFTER INIT
-        /// </summary>
-        private static Boolean _KACWrapped = false;
+        public static Kacapi KAC;
 
         /// <summary>
-        /// Whether the object has been wrapped and the APIReady flag is set in the real KAC
+        ///     Whether we managed to wrap all the methods/functions from the instance.
+        ///     SET AFTER INIT
         /// </summary>
-        public static Boolean APIReady { get { return _KACWrapped && KAC.APIReady && !NeedUpgrade; } }
-
-
-        public static Boolean NeedUpgrade { get; private set; }
+        private static bool _KACWrapped;
 
         /// <summary>
-        /// This method will set up the KAC object and wrap all the methods/functions
+        ///     Whether we found the KerbalAlarmClock assembly in the loadedassemblies.
+        ///     SET AFTER INIT
+        /// </summary>
+        public static bool AssemblyExists => KACType != null;
+
+        /// <summary>
+        ///     Whether we managed to hook the running Instance from the assembly.
+        ///     SET AFTER INIT
+        /// </summary>
+        public static bool InstanceExists => KAC != null;
+
+        /// <summary>
+        ///     Whether the object has been wrapped and the APIReady flag is set in the real KAC
+        /// </summary>
+        public static bool APIReady => _KACWrapped && KAC.APIReady && !NeedUpgrade;
+
+
+        public static bool NeedUpgrade { get; private set; }
+
+        /// <summary>
+        ///     This method will set up the KAC object and wrap all the methods/functions
         /// </summary>
         /// <param name="Force">This option will force the Init function to rebind everything</param>
         /// <returns></returns>
-        public static Boolean InitKACWrapper()
+        public static bool InitKACWrapper()
         {
             //if (!_KACWrapped )
             //{
@@ -81,17 +82,12 @@ namespace MonthlyBudgets_KACWrapper
                     KACType = t;
             });
 
-            if (KACType == null)
-            {
-                return false;
-            }
+            if (KACType == null) return false;
 
             LogFormatted("KAC Version:{0}", KACType.Assembly.GetName().Version.ToString());
-            if (KACType.Assembly.GetName().Version.CompareTo(new System.Version(3, 0, 0, 5)) < 0)
-            {
+            if (KACType.Assembly.GetName().Version.CompareTo(new Version(3, 0, 0, 5)) < 0)
                 //No TimeEntry or alarmchoice options = need a newer version
                 NeedUpgrade = true;
-            }
 
             //now the Alarm Type
             KACAlarmType = AssemblyLoader.loadedAssemblies
@@ -99,10 +95,7 @@ namespace MonthlyBudgets_KACWrapper
                 .SelectMany(t => t)
                 .FirstOrDefault(t => t.FullName == "KerbalAlarmClock.KACAlarm");
 
-            if (KACAlarmType == null)
-            {
-                return false;
-            }
+            if (KACAlarmType == null) return false;
 
             //now grab the running instance
             LogFormatted("Got Assembly Types, grabbing Instance");
@@ -117,6 +110,7 @@ namespace MonthlyBudgets_KACWrapper
                 LogFormatted("No APIInstance found - most likely you have KAC v2 installed");
                 //throw;
             }
+
             if (actualKAC == null)
             {
                 LogFormatted("Failed grabbing Instance");
@@ -125,19 +119,72 @@ namespace MonthlyBudgets_KACWrapper
 
             //If we get this far we can set up the local object and its methods/functions
             LogFormatted("Got Instance, Creating Wrapper Objects");
-            KAC = new KACAPI(actualKAC);
+            KAC = new Kacapi(actualKAC);
             //}
             _KACWrapped = true;
             return true;
         }
 
         /// <summary>
-        /// The Type that is an analogue of the real KAC. This lets you access all the API-able properties and Methods of the KAC
+        ///     The Type that is an analogue of the real KAC. This lets you access all the API-able properties and Methods of the
+        ///     KAC
         /// </summary>
-        public class KACAPI
+        public class Kacapi
         {
+            public enum AlarmActionEnum
+            {
+                [Description("Do Nothing-Delete When Past")]
+                DoNothingDeleteWhenPassed,
+                [Description("Do Nothing")] DoNothing,
 
-            internal KACAPI(Object KAC)
+                [Description("Message Only-No Affect on warp")]
+                MessageOnly,
+
+                [Description("Kill Warp Only-No Message")]
+                KillWarpOnly,
+                [Description("Kill Warp and Message")] KillWarp,
+
+                [Description("Pause Game and Message")]
+                PauseGame
+            }
+
+            public enum AlarmTypeEnum
+            {
+                Raw,
+                Maneuver,
+                ManeuverAuto,
+                Apoapsis,
+                Periapsis,
+                AscendingNode,
+                DescendingNode,
+                LaunchRendevous,
+                Closest,
+                SOIChange,
+                SOIChangeAuto,
+                Transfer,
+                TransferModelled,
+                Distance,
+                Crew,
+                EarthTime,
+                Contract,
+                ContractAuto,
+                ScienceLab
+            }
+
+            public enum TimeEntryPrecisionEnum
+            {
+                Seconds = 0,
+                Minutes = 1,
+                Hours = 2,
+                Days = 3,
+                Years = 4
+            }
+
+            private readonly object actualKAC;
+
+            private readonly FieldInfo APIReadyField;
+
+            internal Kacapi(object KAC)
             {
                 //store the actual object
                 actualKAC = KAC;
@@ -146,33 +193,35 @@ namespace MonthlyBudgets_KACWrapper
                 //for events we also add a handler
                 LogFormatted("Getting APIReady Object");
                 APIReadyField = KACType.GetField("APIReady", BindingFlags.Public | BindingFlags.Static);
-                LogFormatted("Success: " + (APIReadyField != null).ToString());
+                LogFormatted("Success: " + (APIReadyField != null));
 
                 //WORK OUT THE STUFF WE NEED TO HOOK FOR PEOPEL HERE
                 LogFormatted("Getting Alarms Object");
                 AlarmsField = KACType.GetField("alarms", BindingFlags.Public | BindingFlags.Static);
                 actualAlarms = AlarmsField.GetValue(actualKAC);
-                LogFormatted("Success: " + (actualAlarms != null).ToString());
+                LogFormatted("Success: " + (actualAlarms != null));
 
                 //Events
                 LogFormatted("Getting Alarm State Change Event");
-                onAlarmStateChangedEvent = KACType.GetEvent("onAlarmStateChanged", BindingFlags.Public | BindingFlags.Instance);
-                LogFormatted_DebugOnly("Success: " + (onAlarmStateChangedEvent != null).ToString());
+                onAlarmStateChangedEvent =
+                    KACType.GetEvent("onAlarmStateChanged", BindingFlags.Public | BindingFlags.Instance);
+                LogFormatted_DebugOnly("Success: " + (onAlarmStateChangedEvent != null));
                 LogFormatted_DebugOnly("Adding Handler");
                 AddHandler(onAlarmStateChangedEvent, actualKAC, AlarmStateChanged);
 
                 //Methods
                 LogFormatted("Getting Create Method");
                 CreateAlarmMethod = KACType.GetMethod("CreateAlarm", BindingFlags.Public | BindingFlags.Instance);
-                LogFormatted_DebugOnly("Success: " + (CreateAlarmMethod != null).ToString());
+                LogFormatted_DebugOnly("Success: " + (CreateAlarmMethod != null));
 
                 LogFormatted("Getting Delete Method");
                 DeleteAlarmMethod = KACType.GetMethod("DeleteAlarm", BindingFlags.Public | BindingFlags.Instance);
-                LogFormatted_DebugOnly("Success: " + (DeleteAlarmMethod != null).ToString());
+                LogFormatted_DebugOnly("Success: " + (DeleteAlarmMethod != null));
 
                 LogFormatted("Getting DrawAlarmAction");
-                DrawAlarmActionChoiceMethod = KACType.GetMethod("DrawAlarmActionChoiceAPI", BindingFlags.Public | BindingFlags.Instance);
-                LogFormatted_DebugOnly("Success: " + (DrawAlarmActionChoiceMethod != null).ToString());
+                DrawAlarmActionChoiceMethod = KACType.GetMethod("DrawAlarmActionChoiceAPI",
+                    BindingFlags.Public | BindingFlags.Instance);
+                LogFormatted_DebugOnly("Success: " + (DrawAlarmActionChoiceMethod != null));
 
                 //LogFormatted("Getting DrawTimeEntry");
                 //DrawTimeEntryMethod = KACType.GetMethod("DrawTimeEntryAPI", BindingFlags.Public | BindingFlags.Instance);
@@ -186,200 +235,59 @@ namespace MonthlyBudgets_KACWrapper
                 //}
             }
 
-            private Object actualKAC;
-
-            private FieldInfo APIReadyField;
             /// <summary>
-            /// Whether the APIReady flag is set in the real KAC
+            ///     Whether the APIReady flag is set in the real KAC
             /// </summary>
-            public Boolean APIReady
+            public bool APIReady
             {
                 get
                 {
                     if (APIReadyField == null)
                         return false;
 
-                    return (Boolean)APIReadyField.GetValue(null);
+                    return (bool) APIReadyField.GetValue(null);
                 }
             }
 
-            #region Alarms
-            private Object actualAlarms;
-            private FieldInfo AlarmsField;
-
-            /// <summary>
-            /// The list of Alarms that are currently active in game
-            /// </summary>
-            internal KACAlarmList Alarms
+            public class KacAlarm
             {
-                get
+                public enum AlarmStateEventsEnum
                 {
-                    return ExtractAlarmList(actualAlarms);
-                }
-            }
-
-            /// <summary>
-            /// This converts the KACAlarmList actual object to a new List for consumption
-            /// </summary>
-            /// <param name="actualAlarmList"></param>
-            /// <returns></returns>
-            private KACAlarmList ExtractAlarmList(Object actualAlarmList)
-            {
-                KACAlarmList ListToReturn = new KACAlarmList();
-                try
-                {
-                    //iterate each "value" in the dictionary
-
-                    foreach (var item in (IList)actualAlarmList)
-                    {
-                        KACAlarm r1 = new KACAlarm(item);
-                        ListToReturn.Add(r1);
-                    }
-                }
-                catch (Exception)
-                {
-                    //LogFormatted("Arrggg: {0}", ex.Message);
-                    //throw ex;
-                    //
-                }
-                return ListToReturn;
-            }
-
-            #endregion
-
-            #region Events
-            /// <summary>
-            /// Takes an EventInfo and binds a method to the event firing
-            /// </summary>
-            /// <param name="Event">EventInfo of the event we want to attach to</param>
-            /// <param name="KACObject">actual object the eventinfo is gathered from</param>
-            /// <param name="Handler">Method that we are going to hook to the event</param>
-            protected void AddHandler(EventInfo Event, Object KACObject, Action<Object> Handler)
-            {
-                //build a delegate
-                Delegate d = Delegate.CreateDelegate(Event.EventHandlerType, Handler.Target, Handler.Method);
-                //get the Events Add method
-                MethodInfo addHandler = Event.GetAddMethod();
-                //and add the delegate
-                addHandler.Invoke(KACObject, new System.Object[] { d });
-            }
-
-            //the info about the event;
-            private EventInfo onAlarmStateChangedEvent;
-
-            /// <summary>
-            /// Event that fires when the State of an Alarm changes
-            /// </summary>
-            public event AlarmStateChangedHandler onAlarmStateChanged;
-            /// <summary>
-            /// Structure of the event delegeate
-            /// </summary>
-            /// <param name="e"></param>
-            public delegate void AlarmStateChangedHandler(AlarmStateChangedEventArgs e);
-            /// <summary>
-            /// This is the structure that holds the event arguments
-            /// </summary>
-            public class AlarmStateChangedEventArgs
-            {
-                public AlarmStateChangedEventArgs(System.Object actualEvent, KACAPI kac)
-                {
-                    Type type = actualEvent.GetType();
-                    this.alarm = new KACAlarm(type.GetField("alarm").GetValue(actualEvent));
-                    this.eventType = (KACAlarm.AlarmStateEventsEnum)type.GetField("eventType").GetValue(actualEvent);
-
+                    Created,
+                    Triggered,
+                    Closed,
+                    Deleted
                 }
 
-                /// <summary>
-                /// Alarm that has had the state change
-                /// </summary>
-                public KACAlarm alarm;
-                /// <summary>
-                /// What the state was before the event
-                /// </summary>
-                public KACAlarm.AlarmStateEventsEnum eventType;
-            }
+                private readonly object actualAlarm;
+
+                private readonly FieldInfo AlarmActionField;
+
+                private readonly FieldInfo AlarmMarginField;
+
+                private readonly PropertyInfo AlarmTimeProperty;
+
+                private readonly FieldInfo AlarmTypeField;
+
+                private readonly FieldInfo IDField;
+
+                private readonly FieldInfo NameField;
+
+                private readonly FieldInfo NotesField;
+
+                private readonly FieldInfo RemainingField;
 
 
-            /// <summary>
-            /// private function that grabs the actual event and fires our wrapped one
-            /// </summary>
-            /// <param name="actualEvent">actual event from the KAC</param>
-            private void AlarmStateChanged(object actualEvent)
-            {
-                if (onAlarmStateChanged != null)
-                {
-                    onAlarmStateChanged(new AlarmStateChangedEventArgs(actualEvent, this));
-                }
-            }
-            #endregion
+                private readonly FieldInfo RepeatAlarmField;
+                private readonly PropertyInfo RepeatAlarmPeriodProperty;
 
+                private readonly FieldInfo VesselIDField;
 
-            #region Methods
-            private MethodInfo CreateAlarmMethod;
+                private readonly FieldInfo XferOriginBodyNameField;
 
-            /// <summary>
-            /// Create a new Alarm
-            /// </summary>
-            /// <param name="AlarmType">What type of alarm are we creating</param>
-            /// <param name="Name">Name of the Alarm for the display</param>
-            /// <param name="UT">Universal Time for the alarm</param>
-            /// <returns>ID of the newly created alarm</returns>
-            internal String CreateAlarm(AlarmTypeEnum AlarmType, String Name, Double UT)
-            {
-                return (String)CreateAlarmMethod.Invoke(actualKAC, new System.Object[] { (Int32)AlarmType, Name, UT });
-            }
+                private readonly FieldInfo XferTargetBodyNameField;
 
-
-            private MethodInfo DeleteAlarmMethod;
-            /// <summary>
-            /// Delete an Alarm
-            /// </summary>
-            /// <param name="AlarmID">Unique ID of the alarm</param>
-            /// <returns>Success of the deletion</returns>
-            internal Boolean DeleteAlarm(String AlarmID)
-            {
-                return (Boolean)DeleteAlarmMethod.Invoke(actualKAC, new System.Object[] { AlarmID });
-            }
-
-
-            private MethodInfo DrawAlarmActionChoiceMethod;
-            /// <summary>
-            /// Delete an Alarm
-            /// </summary>
-            /// <param name="AlarmID">Unique ID of the alarm</param>
-            /// <returns>Success of the deletion</returns>
-            internal Boolean DrawAlarmActionChoice(ref AlarmActionEnum Choice, String LabelText, Int32 LabelWidth, Int32 ButtonWidth)
-            {
-                Int32 InValue = (Int32)Choice;
-                Int32 OutValue = (Int32)DrawAlarmActionChoiceMethod.Invoke(actualKAC, new System.Object[] { InValue, LabelText, LabelWidth, ButtonWidth });
-
-                Choice = (AlarmActionEnum)OutValue;
-                return (InValue != OutValue);
-            }
-
-            //Remmed out due to it borking window layout
-            //private MethodInfo DrawTimeEntryMethod;
-            ///// <summary>
-            ///// Delete an Alarm
-            ///// </summary>
-            ///// <param name="AlarmID">Unique ID of the alarm</param>
-            ///// <returns>Success of the deletion</returns>
-
-            //internal Boolean DrawTimeEntry(ref Double Time, TimeEntryPrecisionEnum Prec, String LabelText, Int32 LabelWidth)
-            //{
-            //    Double InValue = Time;
-            //    Double OutValue = (Double)DrawTimeEntryMethod.Invoke(actualKAC, new System.Object[] { InValue, (Int32)Prec, LabelText, LabelWidth });
-
-            //    Time = OutValue;
-            //    return (InValue != OutValue);
-            //}
-
-
-            #endregion
-
-            public class KACAlarm
-            {
-                internal KACAlarm(Object a)
+                internal KacAlarm(object a)
                 {
                     actualAlarm = a;
                     VesselIDField = KACAlarmType.GetField("VesselID");
@@ -410,220 +318,330 @@ namespace MonthlyBudgets_KACWrapper
                     //    LogFormatted("F:{0}-{1}", fi.Name, fi.DeclaringType);
                     //}
                 }
-                private Object actualAlarm;
 
-                private FieldInfo VesselIDField;
                 /// <summary>
-                /// Unique Identifier of the Vessel that the alarm is attached to
+                ///     Unique Identifier of the Vessel that the alarm is attached to
                 /// </summary>
-                public String VesselID
+                public string VesselID
                 {
-                    get { return (String)VesselIDField.GetValue(actualAlarm); }
-                    set { VesselIDField.SetValue(actualAlarm, value); }
+                    get => (string) VesselIDField.GetValue(actualAlarm);
+                    set => VesselIDField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo IDField;
                 /// <summary>
-                /// Unique Identifier of this alarm
+                ///     Unique Identifier of this alarm
                 /// </summary>
-                public String ID
+                public string ID => (string) IDField.GetValue(actualAlarm);
+
+                /// <summary>
+                ///     Short Text Name for the Alarm
+                /// </summary>
+                public string Name
                 {
-                    get { return (String)IDField.GetValue(actualAlarm); }
+                    get => (string) NameField.GetValue(actualAlarm);
+                    set => NameField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo NameField;
                 /// <summary>
-                /// Short Text Name for the Alarm
+                ///     Longer Text Description for the Alarm
                 /// </summary>
-                public String Name
+                public string Notes
                 {
-                    get { return (String)NameField.GetValue(actualAlarm); }
-                    set { NameField.SetValue(actualAlarm, value); }
+                    get => (string) NotesField.GetValue(actualAlarm);
+                    set => NotesField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo NotesField;
                 /// <summary>
-                /// Longer Text Description for the Alarm
+                ///     Name of the origin body for a transfer
                 /// </summary>
-                public String Notes
+                public string XferOriginBodyName
                 {
-                    get { return (String)NotesField.GetValue(actualAlarm); }
-                    set { NotesField.SetValue(actualAlarm, value); }
+                    get => (string) XferOriginBodyNameField.GetValue(actualAlarm);
+                    set => XferOriginBodyNameField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo XferOriginBodyNameField;
                 /// <summary>
-                /// Name of the origin body for a transfer
+                ///     Name of the destination body for a transfer
                 /// </summary>
-                public String XferOriginBodyName
+                public string XferTargetBodyName
                 {
-                    get { return (String)XferOriginBodyNameField.GetValue(actualAlarm); }
-                    set { XferOriginBodyNameField.SetValue(actualAlarm, value); }
+                    get => (string) XferTargetBodyNameField.GetValue(actualAlarm);
+                    set => XferTargetBodyNameField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo XferTargetBodyNameField;
                 /// <summary>
-                /// Name of the destination body for a transfer
+                ///     What type of Alarm is this - affects icon displayed and some calc options
                 /// </summary>
-                public String XferTargetBodyName
+                public AlarmTypeEnum AlarmType => (AlarmTypeEnum) AlarmTypeField.GetValue(actualAlarm);
+
+                /// <summary>
+                ///     In game UT value of the alarm
+                /// </summary>
+                public double AlarmTime
                 {
-                    get { return (String)XferTargetBodyNameField.GetValue(actualAlarm); }
-                    set { XferTargetBodyNameField.SetValue(actualAlarm, value); }
+                    get => (double) AlarmTimeProperty.GetValue(actualAlarm, null);
+                    set => AlarmTimeProperty.SetValue(actualAlarm, value, null);
                 }
 
-                private FieldInfo AlarmTypeField;
                 /// <summary>
-                /// What type of Alarm is this - affects icon displayed and some calc options
+                ///     In game seconds the alarm will fire before the event it is for
                 /// </summary>
-                public AlarmTypeEnum AlarmType { get { return (AlarmTypeEnum)AlarmTypeField.GetValue(actualAlarm); } }
-
-                private PropertyInfo AlarmTimeProperty;
-                /// <summary>
-                /// In game UT value of the alarm
-                /// </summary>
-                public Double AlarmTime
+                public double AlarmMargin
                 {
-                    get { return (Double)AlarmTimeProperty.GetValue(actualAlarm, null); }
-                    set { AlarmTimeProperty.SetValue(actualAlarm, value, null); }
+                    get => (double) AlarmMarginField.GetValue(actualAlarm);
+                    set => AlarmMarginField.SetValue(actualAlarm, value);
                 }
 
-                private FieldInfo AlarmMarginField;
                 /// <summary>
-                /// In game seconds the alarm will fire before the event it is for
-                /// </summary>
-                public Double AlarmMargin
-                {
-                    get { return (Double)AlarmMarginField.GetValue(actualAlarm); }
-                    set { AlarmMarginField.SetValue(actualAlarm, value); }
-                }
-
-                private FieldInfo AlarmActionField;
-                /// <summary>
-                /// What should the Alarm Clock do when the alarm fires
+                ///     What should the Alarm Clock do when the alarm fires
                 /// </summary>
                 public AlarmActionEnum AlarmAction
                 {
-                    get { return (AlarmActionEnum)AlarmActionField.GetValue(actualAlarm); }
-                    set { AlarmActionField.SetValue(actualAlarm, (Int32)value); }
+                    get => (AlarmActionEnum) AlarmActionField.GetValue(actualAlarm);
+                    set => AlarmActionField.SetValue(actualAlarm, (int) value);
                 }
 
-                private FieldInfo RemainingField;
                 /// <summary>
-                /// How much Game time is left before the alarm fires
+                ///     How much Game time is left before the alarm fires
                 /// </summary>
-                public Double Remaining { get { return (Double)RemainingField.GetValue(actualAlarm); } }
+                public double Remaining => (double) RemainingField.GetValue(actualAlarm);
 
-
-                private FieldInfo RepeatAlarmField;
                 /// <summary>
-                /// Whether the alarm will be repeated after it fires
+                ///     Whether the alarm will be repeated after it fires
                 /// </summary>
-                public Boolean RepeatAlarm
+                public bool RepeatAlarm
                 {
-                    get { return (Boolean)RepeatAlarmField.GetValue(actualAlarm); }
-                    set { RepeatAlarmField.SetValue(actualAlarm, value); }
+                    get => (bool) RepeatAlarmField.GetValue(actualAlarm);
+                    set => RepeatAlarmField.SetValue(actualAlarm, value);
                 }
-                private PropertyInfo RepeatAlarmPeriodProperty;
+
                 /// <summary>
-                /// Value in Seconds after which the alarm will repeat
+                ///     Value in Seconds after which the alarm will repeat
                 /// </summary>
-                public Double RepeatAlarmPeriod
+                public double RepeatAlarmPeriod
                 {
                     get
                     {
-                        try { return (Double)RepeatAlarmPeriodProperty.GetValue(actualAlarm, null); }
-                        catch (Exception) { return 0; }
+                        try
+                        {
+                            return (double) RepeatAlarmPeriodProperty.GetValue(actualAlarm, null);
+                        }
+                        catch (Exception)
+                        {
+                            return 0;
+                        }
                     }
-                    set { RepeatAlarmPeriodProperty.SetValue(actualAlarm, value, null); }
+                    set => RepeatAlarmPeriodProperty.SetValue(actualAlarm, value, null);
                 }
+            }
 
-                public enum AlarmStateEventsEnum
+            public class KacAlarmList : List<KacAlarm>
+            {
+            }
+
+            #region Alarms
+
+            private readonly object actualAlarms;
+            private readonly FieldInfo AlarmsField;
+
+            /// <summary>
+            ///     The list of Alarms that are currently active in game
+            /// </summary>
+            internal KacAlarmList Alarms => ExtractAlarmList(actualAlarms);
+
+            /// <summary>
+            ///     This converts the KACAlarmList actual object to a new List for consumption
+            /// </summary>
+            /// <param name="actualAlarmList"></param>
+            /// <returns></returns>
+            private KacAlarmList ExtractAlarmList(object actualAlarmList)
+            {
+                KacAlarmList ListToReturn = new KacAlarmList();
+                try
                 {
-                    Created,
-                    Triggered,
-                    Closed,
-                    Deleted,
+                    //iterate each "value" in the dictionary
+
+                    foreach (object item in (IList) actualAlarmList)
+                    {
+                        KacAlarm r1 = new KacAlarm(item);
+                        ListToReturn.Add(r1);
+                    }
+                }
+                catch (Exception)
+                {
+                    //LogFormatted("Arrggg: {0}", ex.Message);
+                    //throw ex;
+                    //
+                }
+
+                return ListToReturn;
+            }
+
+            #endregion
+
+            #region Events
+
+            /// <summary>
+            ///     Takes an EventInfo and binds a method to the event firing
+            /// </summary>
+            /// <param name="Event">EventInfo of the event we want to attach to</param>
+            /// <param name="KACObject">actual object the eventinfo is gathered from</param>
+            /// <param name="Handler">Method that we are going to hook to the event</param>
+            protected void AddHandler(EventInfo Event, object KACObject, Action<object> Handler)
+            {
+                //build a delegate
+                Delegate d = Delegate.CreateDelegate(Event.EventHandlerType, Handler.Target, Handler.Method);
+                //get the Events Add method
+                MethodInfo addHandler = Event.GetAddMethod();
+                //and add the delegate
+                addHandler.Invoke(KACObject, new object[] {d});
+            }
+
+            //the info about the event;
+            private readonly EventInfo onAlarmStateChangedEvent;
+
+            /// <summary>
+            ///     Event that fires when the State of an Alarm changes
+            /// </summary>
+            public event AlarmStateChangedHandler onAlarmStateChanged;
+
+            /// <summary>
+            ///     Structure of the event delegeate
+            /// </summary>
+            /// <param name="e"></param>
+            public delegate void AlarmStateChangedHandler(AlarmStateChangedEventArgs e);
+
+            /// <summary>
+            ///     This is the structure that holds the event arguments
+            /// </summary>
+            public class AlarmStateChangedEventArgs
+            {
+                /// <summary>
+                ///     Alarm that has had the state change
+                /// </summary>
+                public KacAlarm alarm;
+
+                /// <summary>
+                ///     What the state was before the event
+                /// </summary>
+                public KacAlarm.AlarmStateEventsEnum eventType;
+
+                public AlarmStateChangedEventArgs(object actualEvent, Kacapi kac)
+                {
+                    Type type = actualEvent.GetType();
+                    alarm = new KacAlarm(type.GetField("alarm").GetValue(actualEvent));
+                    eventType = (KacAlarm.AlarmStateEventsEnum) type.GetField("eventType").GetValue(actualEvent);
                 }
             }
 
-            public enum AlarmTypeEnum
+
+            /// <summary>
+            ///     private function that grabs the actual event and fires our wrapped one
+            /// </summary>
+            /// <param name="actualEvent">actual event from the KAC</param>
+            private void AlarmStateChanged(object actualEvent)
             {
-                Raw,
-                Maneuver,
-                ManeuverAuto,
-                Apoapsis,
-                Periapsis,
-                AscendingNode,
-                DescendingNode,
-                LaunchRendevous,
-                Closest,
-                SOIChange,
-                SOIChangeAuto,
-                Transfer,
-                TransferModelled,
-                Distance,
-                Crew,
-                EarthTime,
-                Contract,
-                ContractAuto,
-                ScienceLab
+                if (onAlarmStateChanged != null) onAlarmStateChanged(new AlarmStateChangedEventArgs(actualEvent, this));
             }
 
-            public enum AlarmActionEnum
+            #endregion
+
+
+            #region Methods
+
+            private readonly MethodInfo CreateAlarmMethod;
+
+            /// <summary>
+            ///     Create a new Alarm
+            /// </summary>
+            /// <param name="AlarmType">What type of alarm are we creating</param>
+            /// <param name="Name">Name of the Alarm for the display</param>
+            /// <param name="UT">Universal Time for the alarm</param>
+            /// <returns>ID of the newly created alarm</returns>
+            internal string CreateAlarm(AlarmTypeEnum AlarmType, string Name, double UT)
             {
-                [Description("Do Nothing-Delete When Past")]
-                DoNothingDeleteWhenPassed,
-                [Description("Do Nothing")]
-                DoNothing,
-                [Description("Message Only-No Affect on warp")]
-                MessageOnly,
-                [Description("Kill Warp Only-No Message")]
-                KillWarpOnly,
-                [Description("Kill Warp and Message")]
-                KillWarp,
-                [Description("Pause Game and Message")]
-                PauseGame,
+                return (string) CreateAlarmMethod.Invoke(actualKAC, new object[] {(int) AlarmType, Name, UT});
             }
 
-            public enum TimeEntryPrecisionEnum
+
+            private readonly MethodInfo DeleteAlarmMethod;
+
+            /// <summary>
+            ///     Delete an Alarm
+            /// </summary>
+            /// <param name="AlarmID">Unique ID of the alarm</param>
+            /// <returns>Success of the deletion</returns>
+            internal bool DeleteAlarm(string AlarmID)
             {
-                Seconds = 0,
-                Minutes = 1,
-                Hours = 2,
-                Days = 3,
-                Years = 4
+                return (bool) DeleteAlarmMethod.Invoke(actualKAC, new object[] {AlarmID});
             }
 
-            public class KACAlarmList : List<KACAlarm>
-            {
 
+            private readonly MethodInfo DrawAlarmActionChoiceMethod;
+
+            /// <summary>
+            ///     Delete an Alarm
+            /// </summary>
+            /// <param name="AlarmID">Unique ID of the alarm</param>
+            /// <returns>Success of the deletion</returns>
+            internal bool DrawAlarmActionChoice(ref AlarmActionEnum Choice, string LabelText, int LabelWidth,
+                int ButtonWidth)
+            {
+                int InValue = (int) Choice;
+                int OutValue = (int) DrawAlarmActionChoiceMethod.Invoke(actualKAC,
+                    new object[] {InValue, LabelText, LabelWidth, ButtonWidth});
+
+                Choice = (AlarmActionEnum) OutValue;
+                return InValue != OutValue;
             }
+
+            //Remmed out due to it borking window layout
+            //private MethodInfo DrawTimeEntryMethod;
+            ///// <summary>
+            ///// Delete an Alarm
+            ///// </summary>
+            ///// <param name="AlarmID">Unique ID of the alarm</param>
+            ///// <returns>Success of the deletion</returns>
+
+            //internal Boolean DrawTimeEntry(ref Double Time, TimeEntryPrecisionEnum Prec, String LabelText, Int32 LabelWidth)
+            //{
+            //    Double InValue = Time;
+            //    Double OutValue = (Double)DrawTimeEntryMethod.Invoke(actualKAC, new System.Object[] { InValue, (Int32)Prec, LabelText, LabelWidth });
+
+            //    Time = OutValue;
+            //    return (InValue != OutValue);
+            //}
+
+            #endregion
         }
+
         #region Logging Stuff
+
         /// <summary>
-        /// Some Structured logging to the debug file - ONLY RUNS WHEN DLL COMPILED IN DEBUG MODE
+        ///     Some Structured logging to the debug file - ONLY RUNS WHEN DLL COMPILED IN DEBUG MODE
         /// </summary>
         /// <param name="Message">Text to be printed - can be formatted as per String.format</param>
         /// <param name="strParams">Objects to feed into a String.format</param>
-        [System.Diagnostics.Conditional("DEBUG")]
-        internal static void LogFormatted_DebugOnly(String Message, params Object[] strParams)
+        [Conditional("DEBUG")]
+        internal static void LogFormatted_DebugOnly(string Message, params object[] strParams)
         {
             LogFormatted(Message, strParams);
         }
 
         /// <summary>
-        /// Some Structured logging to the debug file
+        ///     Some Structured logging to the debug file
         /// </summary>
         /// <param name="Message">Text to be printed - can be formatted as per String.format</param>
         /// <param name="strParams">Objects to feed into a String.format</param>
-        internal static void LogFormatted(String Message, params Object[] strParams)
+        internal static void LogFormatted(string Message, params object[] strParams)
         {
-            Message = String.Format(Message, strParams);
-            String strMessageLine = String.Format("{0},{2}-{3},{1}",
-                DateTime.Now, Message, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name,
-                System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
-            UnityEngine.Debug.Log(strMessageLine);
+            Message = string.Format(Message, strParams);
+            string strMessageLine = string.Format("{0},{2}-{3},{1}",
+                DateTime.Now, Message, Assembly.GetExecutingAssembly().GetName().Name,
+                MethodBase.GetCurrentMethod().DeclaringType.Name);
+            Debug.Log(strMessageLine);
         }
+
         #endregion
     }
 }

@@ -1,96 +1,93 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace MonthlyBudgets
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
-    class AF : MonoBehaviour
+    internal class Af : MonoBehaviour
     {
-        bool firstWindow = true;
-        bool secondWindow = false;
-        bool finalWindow = false;
-        Rect Window = new Rect(20, 100, 240, 50);
-        private GUIStyle headlineStyle = new GUIStyle();
-        double originalFunding;
-        bool showGUI = false;
+        private bool _finalWindow;
+        private bool _firstWindow = true;
+        private readonly GUIStyle _headlineStyle = new GUIStyle();
+        private double _originalFunding;
+        private bool _secondWindow;
+        private bool _showGui;
+        private Rect _window = new Rect(20, 100, 240, 50);
 
-        void Start()
+        private void Start()
         {
-            if (DateTime.Today.Day == 1 && DateTime.Today.Month == 4 && !MonthlyBudgets.instance.jokeSeen && HighLogic.CurrentGame.Mode == Game.Modes.CAREER) showGUI = true;
+            if (DateTime.Today.Day == 1 && DateTime.Today.Month == 4 && !MonthlyBudgets.instance.jokeSeen &&
+                HighLogic.CurrentGame.Mode == Game.Modes.CAREER) _showGui = true;
         }
 
         public void OnGUI()
         {
-            if (showGUI)
-            {
-                Window = GUILayout.Window(99124973, Window, GUIDisplay, "Crisis at the KSC!", GUILayout.Width(200));
-            }
+            if (_showGui)
+                _window = GUILayout.Window(99124973, _window, GuiDisplay, "Crisis at the KSC!", GUILayout.Width(200));
         }
 
-        private void GUIDisplay(int id)
+        private void GuiDisplay(int id)
         {
-            if (firstWindow)
+            if (_firstWindow)
             {
-                headlineStyle.fontSize = 24;
-                headlineStyle.normal.textColor = Color.red;
-                GUILayout.Label("From the desk of Mortimer Kerman", headlineStyle);
+                _headlineStyle.fontSize = 24;
+                _headlineStyle.normal.textColor = Color.red;
+                GUILayout.Label("From the desk of Mortimer Kerman", _headlineStyle);
                 GUILayout.Label("Terrible news! The KSC has been overtaken by ransomware");
-                GUILayout.Label("The hackers are threatening to delete all our data unless we pay 1 million KitKoin immediately");
+                GUILayout.Label(
+                    "The hackers are threatening to delete all our data unless we pay 1 million KitKoin immediately");
                 GUILayout.Label("What shall we do?");
                 if (GUILayout.Button("Pay them of course!"))
                 {
-                    originalFunding = Funding.Instance.Funds;
-                    Funding.Instance.AddFunds(-Funding.Instance.Funds,TransactionReasons.None);
-                    firstWindow = false;
-                    showGUI = false;
-                    Invoke("AprilFool", 30.0f);
+                    _originalFunding = Funding.Instance.Funds;
+                    Funding.Instance.AddFunds(-Funding.Instance.Funds, TransactionReasons.None);
+                    _firstWindow = false;
+                    _showGui = false;
+                    Invoke(nameof(AprilFool), 30.0f);
                 }
+
                 if (GUILayout.Button("Bah! I reject their empty threats"))
                 {
-                    firstWindow = false;
-                    secondWindow = true;
-                    originalFunding = Funding.Instance.Funds;
+                    _firstWindow = false;
+                    _secondWindow = true;
+                    _originalFunding = Funding.Instance.Funds;
                     Funding.Instance.AddFunds(-Funding.Instance.Funds, TransactionReasons.None);
                 }
             }
-            if(secondWindow)
+
+            if (_secondWindow)
             {
-                headlineStyle.fontSize = 24;
-                headlineStyle.normal.textColor = Color.red;
-                GUILayout.Label("From the desk of Mortimer Kerman", headlineStyle);
+                _headlineStyle.fontSize = 24;
+                _headlineStyle.normal.textColor = Color.red;
+                GUILayout.Label("From the desk of Mortimer Kerman", _headlineStyle);
                 GUILayout.Label("Bad news boss");
                 GUILayout.Label("Looks like the hackers found their way into our banking software");
                 GUILayout.Label("Perhaps using 'Jeb' as a password was a bad idea");
                 GUILayout.Label("Now they have taken all our funds and we still can't get into our computer systems");
                 if (GUILayout.Button("Oh dear. Perhaps I should have paid them"))
                 {
-                    showGUI = false;
-                    secondWindow = false;
-                    Invoke("AprilFool", 30.0f);
+                    _showGui = false;
+                    _secondWindow = false;
+                    Invoke(nameof(AprilFool), 30.0f);
                 }
             }
-            if(finalWindow)
-            {
-                headlineStyle.fontSize = 24;
-                headlineStyle.normal.textColor = Color.red;
-                GUILayout.Label("From the desk of severedsolo", headlineStyle);
-                GUILayout.Label("I'm just messing with you. April Fools!");
-                GUILayout.Label("Click the button below to get your funds back");
-                if(GUILayout.Button("You got me. You are so clever severedsolo"))
-                {
-                    Funding.Instance.AddFunds(originalFunding,TransactionReasons.None);
-                    showGUI = false;
-                    MonthlyBudgets.instance.jokeSeen = true;
-                }
-            }
+
+            if (!_finalWindow) return;
+            _headlineStyle.fontSize = 24;
+            _headlineStyle.normal.textColor = Color.red;
+            GUILayout.Label("From the desk of severedsolo", _headlineStyle);
+            GUILayout.Label("I'm just messing with you. April Fools!");
+            GUILayout.Label("Click the button below to get your funds back");
+            if (!GUILayout.Button("You got me. You are so clever severedsolo")) return;
+            Funding.Instance.AddFunds(_originalFunding, TransactionReasons.None);
+            _showGui = false;
+            MonthlyBudgets.instance.jokeSeen = true;
         }
-        void AprilFool()
+
+        private void AprilFool()
         {
-            finalWindow = true;
-            showGUI = true;
+            _finalWindow = true;
+            _showGui = true;
         }
     }
 }

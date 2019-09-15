@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using KSP.UI.Screens;
-using System;
 using MonthlyBudgets_KACWrapper;
+using UnityEngine;
+// ReSharper disable CompareOfFloatsByEqualityOperator
+// ReSharper disable Unity.PerformanceCriticalCodeInvocation
 
 namespace MonthlyBudgets
 {
@@ -11,21 +13,22 @@ namespace MonthlyBudgets
     public class MonthlyBudgets : MonoBehaviour
     {
         public static MonthlyBudgets instance;
-        public double lastUpdate = 0;
+
+        //OnBudgetAwarded fires when we award a budget. Overloads are budget, costs)
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static EventData<double, double> onBudgetAwarded;
+        public double dayLength;
+        public double emergencyBudget;
         public float emergencyBudgetPercentage = 10;
         public bool enableEmergencyBudget;
-        public double emergencyBudget = 0;
-        bool timeDiscrepancyLog = true;
-        public float researchBudget = 0;
-        public bool jokeSeen = false;
-        public int launchCosts = 0;
-        public string inputString;
-        public CelestialBody HomeWorld;
+        private SpaceCenterFacility[] _facilities;
+        public CelestialBody homeWorld;
+        public bool jokeSeen;
+        public double lastUpdate;
+        public int launchCosts;
+        public float researchBudget;
+        private bool _timeDiscrepancyLog = true;
         public double yearLength;
-        public double dayLength;
-        private SpaceCenterFacility[] facilities;
-        //OnBudgetAwarded fires when we award a budget. Overloads are budget, costs)
-        public static EventData<double, double> OnBudgetAwarded;
 
         private void Budget(double timeSinceLastUpdate)
         {
@@ -34,35 +37,42 @@ namespace MonthlyBudgets
                 double funds = Funding.Instance.Funds;
                 float costs = 0;
                 double offsetFunds = funds;
-                if ((BudgetSettings.instance.friendlyInterval * dayLength) * 2 > timeSinceLastUpdate)
+                if (BudgetSettings.instance.friendlyInterval * dayLength * 2 > timeSinceLastUpdate)
                 {
                     if (BudgetSettings.instance.hardMode)
                     {
-                        int penalty = (int)funds / 10000;
-                        if (penalty < Reputation.CurrentRep) Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
+                        int penalty = (int) funds / 10000;
+                        if (penalty < Reputation.CurrentRep)
+                            Reputation.Instance.AddReputation(-penalty, TransactionReasons.None);
                         else Reputation.Instance.AddReputation(-Reputation.CurrentRep, TransactionReasons.None);
                         Debug.Log("[MonthlyBudgets]: " + funds + "remaining, " + penalty + " reputation removed");
                     }
+
                     costs = CostCalculate(true);
                     if (BudgetSettings.instance.launchCostsEnabled)
                     {
                         costs += launchCosts;
                         launchCosts = 0;
                     }
+
                     offsetFunds = funds - costs;
-                    if (offsetFunds < costs*2) offsetFunds = costs*2;
+                    if (offsetFunds < costs * 2) offsetFunds = costs * 2;
                 }
+
                 float rep = Reputation.CurrentRep;
-                double budget = (rep * BudgetSettings.instance.multiplier) - costs;
+                double budget = rep * BudgetSettings.instance.multiplier - costs;
                 if (researchBudget > 0)
                 {
-                    float rnd = ((float)budget / 10000) * (researchBudget / 100);
+                    float rnd = (float) budget / 10000 * (researchBudget / 100);
                     ResearchAndDevelopment.Instance.AddScience(rnd, TransactionReasons.RnDs);
-                    ScreenMessages.PostScreenMessage("R&D Department have provided " + Math.Round(rnd, 1) + " science this month");
+                    ScreenMessages.PostScreenMessage("R&D Department have provided " + Math.Round(rnd, 1) +
+                                                     " science this month");
                     Debug.Log("[MonthlyBudgets]: " + Math.Round(rnd, 1) + " science awarded by R&D");
-                    Reputation.Instance.AddReputation(-(Reputation.CurrentRep * (researchBudget / 100)), TransactionReasons.RnDs);
-                    budget = budget - (budget * (researchBudget / 100));
+                    Reputation.Instance.AddReputation(-(Reputation.CurrentRep * (researchBudget / 100)),
+                        TransactionReasons.RnDs);
+                    budget -= budget * (researchBudget / 100);
                 }
+
                 //we shouldn't take money away. If the player holds more than the budget, just don't award.
                 if (budget <= offsetFunds)
                 {
@@ -81,6 +91,7 @@ namespace MonthlyBudgets
                         float repLoss = costs / BudgetSettings.instance.multiplier;
                         Reputation.Instance.AddReputation(-repLoss, TransactionReasons.None);
                     }
+
                     Debug.Log("[MonthlyBudgets]: Budget of " + budget + " is less than available funds of " + funds);
                 }
                 else
@@ -88,59 +99,61 @@ namespace MonthlyBudgets
                     if (enableEmergencyBudget)
                     {
                         double upgradeBudgetReserved = budget * (emergencyBudgetPercentage / 100);
-                        budget = budget - upgradeBudgetReserved;
-                        emergencyBudget = emergencyBudget + upgradeBudgetReserved;
+                        budget -= upgradeBudgetReserved;
+                        emergencyBudget += upgradeBudgetReserved;
                         emergencyBudget = Math.Round(emergencyBudget, 0);
-                        Debug.Log("[MonthlyBudgets]: Diverted " + emergencyBudgetPercentage + "% of budget. BPF is now: " + emergencyBudget);
+                        Debug.Log("[MonthlyBudgets]: Diverted " + emergencyBudgetPercentage +
+                                  "% of budget. BPF is now: " + emergencyBudget);
                     }
+
                     Funding.Instance.AddFunds(-funds, TransactionReasons.None);
                     Funding.Instance.AddFunds(budget, TransactionReasons.None);
                     ScreenMessages.PostScreenMessage("This month's budget is " + budget.ToString("C"));
                     Debug.Log("[MonthlyBudgets]: Budget awarded: " + budget);
                 }
-                lastUpdate = lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength);
+
+                lastUpdate += BudgetSettings.instance.friendlyInterval * dayLength;
                 if (BudgetSettings.instance.decayEnabled)
                 {
-                    Reputation.Instance.AddReputation(-Reputation.CurrentRep * (BudgetSettings.instance.repDecay / 100.0f), TransactionReasons.None);
+                    Reputation.Instance.AddReputation(
+                        -Reputation.CurrentRep * (BudgetSettings.instance.repDecay / 100.0f), TransactionReasons.None);
                     Debug.Log("[MonthlyBudgets]: Removing " + BudgetSettings.instance.repDecay / 100 + "% Reputation");
                 }
-                if (!KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
-                {
-                    TimeWarp.SetRate(0, true);
-                }
-                OnBudgetAwarded.Fire(budget, costs);
+
+                if (!KacWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp) TimeWarp.SetRate(0, true);
+                onBudgetAwarded.Fire(budget, costs);
             }
             catch
             {
-                if(HighLogic.LoadedScene != GameScenes.MAINMENU) Debug.Log("[MonthlyBudgets]: Problem calculating the budget");
+                if (HighLogic.LoadedScene != GameScenes.MAINMENU)
+                    Debug.Log("[MonthlyBudgets]: Problem calculating the budget");
             }
         }
 
-        void Awake()
+        private void Awake()
         {
             DontDestroyOnLoad(this);
             if (!BudgetSettings.instance.masterSwitch) Destroy(this);
             instance = this;
-            OnBudgetAwarded = new EventData<double, double>("OnBudgetAwarded");
+            onBudgetAwarded = new EventData<double, double>("OnBudgetAwarded");
         }
 
-        void Start()
+        private void Start()
         {
-            KACWrapper.InitKACWrapper();
+            KacWrapper.InitKACWrapper();
             PopulateHomeWorldData();
-            facilities = (SpaceCenterFacility[])Enum.GetValues(typeof(SpaceCenterFacility));
+            _facilities = (SpaceCenterFacility[]) Enum.GetValues(typeof(SpaceCenterFacility));
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
             GameEvents.onGameSceneSwitchRequested.Add(SceneSwitch);
-            OnBudgetAwarded.Add(BudgetAwarded);
+            onBudgetAwarded.Add(BudgetAwarded);
         }
 
         internal void BudgetAwarded(double budget, double costs)
         {
-            if (KACWrapper.AssemblyExists && BudgetSettings.instance.stopTimewarp)
-            {
-                if (!KACWrapper.APIReady) return;
-                KACWrapper.KAC.CreateAlarm(KACWrapper.KACAPI.AlarmTypeEnum.Raw, "Next Budget", lastUpdate + (BudgetSettings.instance.friendlyInterval * dayLength));
-            }
+            if (!KacWrapper.AssemblyExists || !BudgetSettings.instance.stopTimewarp) return;
+            if (!KacWrapper.APIReady) return;
+            KacWrapper.KAC.CreateAlarm(KacWrapper.Kacapi.AlarmTypeEnum.Raw, "Next Budget",
+                lastUpdate + BudgetSettings.instance.friendlyInterval * dayLength);
         }
 
         private void SceneSwitch(GameEvents.FromToAction<GameScenes, GameScenes> scenes)
@@ -150,7 +163,7 @@ namespace MonthlyBudgets
             emergencyBudgetPercentage = 10;
             enableEmergencyBudget = false;
             emergencyBudget = 0;
-            timeDiscrepancyLog = true;
+            _timeDiscrepancyLog = true;
             researchBudget = 0;
             jokeSeen = false;
             launchCosts = 0;
@@ -158,19 +171,30 @@ namespace MonthlyBudgets
 
         public void PopulateHomeWorldData()
         {
-            HomeWorld = FlightGlobals.GetHomeBody();
-            dayLength = HomeWorld.solarDayLength;
-            yearLength = HomeWorld.orbit.period;
+            homeWorld = FlightGlobals.GetHomeBody();
+            dayLength = homeWorld.solarDayLength;
+            yearLength = homeWorld.orbit.period;
         }
 
         private void OnVesselRollout(ShipConstruct ship)
         {
             if (!BudgetSettings.instance.launchCostsEnabled) return;
-            if (ship.shipFacility == EditorFacility.VAB) launchCosts += BudgetSettings.instance.launchCostsVAB * ((int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.LaunchPad) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility.LaunchPad)) + 1);
-            else launchCosts += BudgetSettings.instance.launchCostsSPH * ((int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.Runway) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility.Runway)) + 1);
+            if (ship.shipFacility == EditorFacility.VAB)
+                launchCosts += BudgetSettings.instance.launchCostsVab *
+                               ((int) Math.Round(
+                                    ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.LaunchPad) *
+                                    ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility
+                                        .LaunchPad)) + 1);
+            else
+                launchCosts += BudgetSettings.instance.launchCostsSph *
+                               ((int) Math.Round(
+                                    ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.Runway) *
+                                    ScenarioUpgradeableFacilities.GetFacilityLevelCount(SpaceCenterFacility.Runway)) +
+                                1);
         }
 
-        void Update()
+        [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
+        private void Update()
         {
             if (HighLogic.CurrentGame == null) return;
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
@@ -179,21 +203,18 @@ namespace MonthlyBudgets
             if (emergencyBudgetPercentage > 50) emergencyBudgetPercentage = 50;
             if (researchBudget > 100) researchBudget = 100;
             if (researchBudget < 0) researchBudget = 0;
-            double time = (Planetarium.GetUniversalTime());
+            double time = Planetarium.GetUniversalTime();
             while (lastUpdate > time)
             {
-                lastUpdate = lastUpdate - (BudgetSettings.instance.friendlyInterval * dayLength);
-                if (timeDiscrepancyLog)
-                {
-                    Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
-                    timeDiscrepancyLog = false;
-                }
+                lastUpdate -= BudgetSettings.instance.friendlyInterval * dayLength;
+                if (!_timeDiscrepancyLog) continue;
+                Debug.Log("[MonthlyBudgets]: Last update was in the future. Using time machine to correct");
+                _timeDiscrepancyLog = false;
             }
+
             double timeSinceLastUpdate = time - lastUpdate;
-            if (timeSinceLastUpdate >= (BudgetSettings.instance.friendlyInterval * dayLength))
-            {
+            if (timeSinceLastUpdate >= BudgetSettings.instance.friendlyInterval * dayLength)
                 Budget(timeSinceLastUpdate);
-            }
         }
 
         public int CostCalculate(bool log)
@@ -206,35 +227,45 @@ namespace MonthlyBudgets
                 float level = p.experienceLevel;
                 if (level == 0) level = 0.5f;
                 float wages = 0;
-                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) wages = level * BudgetSettings.instance.availableWages;
-                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Assigned) wages = level * BudgetSettings.instance.assignedWages;
-                budget += (int)wages;
+                // ReSharper disable once SwitchStatementMissingSomeCases
+                switch (p.rosterStatus)
+                {
+                    case ProtoCrewMember.RosterStatus.Available:
+                        wages = level * BudgetSettings.instance.availableWages;
+                        break;
+                    case ProtoCrewMember.RosterStatus.Assigned:
+                        wages = level * BudgetSettings.instance.assignedWages;
+                        break;
+                    default:
+                        continue;
+                }
+
+                budget += (int) wages;
             }
-            IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v => v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag && v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown && v.vesselType != VesselType.EVA);
+
+            IEnumerable<Vessel> vessels = FlightGlobals.Vessels.Where(v =>
+                v.vesselType != VesselType.Debris && v.vesselType != VesselType.Flag &&
+                v.vesselType != VesselType.SpaceObject && v.vesselType != VesselType.Unknown &&
+                v.vesselType != VesselType.EVA);
             budget += vessels.Count() * BudgetSettings.instance.vesselCost;
-            if (BudgetSettings.instance.buildingCostsEnabled)
-            {
-                budget += GetBuildingCosts();
-            }
-            if (log)
-            {
-                Debug.Log("[MonthlyBudgets]: Expenses are " + budget);
-            }
+            if (BudgetSettings.instance.buildingCostsEnabled) budget += GetBuildingCosts();
+            if (log) Debug.Log("[MonthlyBudgets]: Expenses are " + budget);
             return budget;
         }
 
-        public int GetBuildingCosts()
+        private int GetBuildingCosts()
         {
             int cost = 0;
-            for (int i = 0; i < facilities.Count(); i++)
+            for (int i = 0; i < _facilities.Length; i++)
             {
-                SpaceCenterFacility facility = facilities.ElementAt(i);
+                SpaceCenterFacility facility = _facilities.ElementAt(i);
                 if (facility == SpaceCenterFacility.LaunchPad || facility == SpaceCenterFacility.Runway) continue;
-                int lvl = (int)Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) * ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
+                int lvl = (int) Math.Round(ScenarioUpgradeableFacilities.GetFacilityLevel(facility) *
+                                           ScenarioUpgradeableFacilities.GetFacilityLevelCount(facility)) + 1;
                 cost += lvl * BudgetSettings.instance.ReturnBuildingCosts(facility);
             }
+
             return cost;
         }
-
     }
 }

@@ -57,7 +57,7 @@ namespace MonthlyBudgets
         public override void OnLoad(ConfigNode node)
         {
             node.TryGetValue("saveGameVersion", ref _saveGameVersion);
-            if (_saveGameVersion != CurrentVersion && _saveGameVersion != PreviousVersion && _saveGameVersion != "0.0")
+            if (_saveGameVersion != CurrentVersion && _saveGameVersion != PreviousVersion && !BudgetSettings.instance.firstRun)
             {
                 SpawnErrorDialog();
                 return;

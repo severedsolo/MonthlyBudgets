@@ -148,10 +148,19 @@ namespace MonthlyBudgets
             onBudgetAwarded.Add(BudgetAwarded);
         }
 
-        internal void BudgetAwarded(double budget, double costs)
+        private void BudgetAwarded(double budget, double costs)
+        {
+            AddKacAlarm();
+        }
+
+        private void AddKacAlarm()
         {
             if (!KacWrapper.AssemblyExists || !BudgetSettings.instance.stopTimewarp) return;
-            if (!KacWrapper.APIReady) return;
+            if (!KacWrapper.APIReady)
+            {
+                Invoke(nameof(AddKacAlarm), 0.5f);
+                return;
+            }
             KacWrapper.KAC.CreateAlarm(KacWrapper.Kacapi.AlarmTypeEnum.Raw, "Next Budget",
                 lastUpdate + BudgetSettings.instance.friendlyInterval * dayLength);
         }

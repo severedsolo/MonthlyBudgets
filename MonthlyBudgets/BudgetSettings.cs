@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using MonthlyBudgets_KACWrapper;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -19,7 +20,7 @@ namespace MonthlyBudgets
         public bool decayEnabled;
         public bool firstRun = true;
         // ReSharper disable once RedundantDefaultMemberInitializer
-        public bool useItOrLoseIt = false;
+        public bool useItOrLoseIt = true;
         public float friendlyInterval = 30;
         private Rect _geometry = new Rect(0.5f, 0.5f, 300, 300);
         public bool hardMode;
@@ -177,7 +178,7 @@ namespace MonthlyBudgets
             }
 
             horizontal[0] = new DialogGUIButton("Switch Page", SwitchPage, false);
-            horizontal[1] = new DialogGUIButton("Close", CloseDialog, false);
+            horizontal[1] = new DialogGUIButton("Close", () => CloseDialog(true), false);
             dialog.Add(new DialogGUIHorizontalLayout(horizontal));
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new MultiOptionDialog("MonthlyBudgetsDialog", "", "Monthly Budgets", UISkinManager.defaultSkin,
@@ -187,14 +188,14 @@ namespace MonthlyBudgets
         private void ToggleMasterSwitch()
         {
             masterSwitch = !masterSwitch;
-            CloseDialog();
+            CloseDialog(false);
             Invoke(nameof(SpawnSettingsDialog), 0.1f);
         }
 
         private void SwitchPage()
         {
             _page1 = !_page1;
-            CloseDialog();
+            CloseDialog(false);
             Invoke(nameof(SpawnSettingsDialog), 0.1f);
         }
 
@@ -203,11 +204,22 @@ namespace MonthlyBudgets
             if (_settingsDialog == null) _settingsDialog = GenerateDialog();
         }
 
-        private void CloseDialog()
+        private void CloseDialog(bool createAlarm)
         {
             Vector3 rt = _settingsDialog.RTrf.position;
             _geometry = new Rect(rt.x / Screen.width + 0.5f, rt.y / Screen.height + 0.5f, 600, 300);
             _settingsDialog.Dismiss();
+            if (!createAlarm) return;
+            if (!KacWrapper.AssemblyExists || !stopTimewarp) return;
+            if (!KacWrapper.APIReady) return;
+            KacWrapper.Kacapi.KacAlarmList alarms = KacWrapper.KAC.Alarms;
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (int i = 0; i < alarms.Count; i++)
+            {
+                string s = alarms[i].Name;
+                if (s == "Next Budget") return;
+            }
+            KacWrapper.KAC.CreateAlarm(KacWrapper.Kacapi.AlarmTypeEnum.Raw, "Next Budget", MonthlyBudgets.instance.lastUpdate + BudgetSettings.instance.friendlyInterval * MonthlyBudgets.instance.dayLength);
         }
 
         public int ReturnBuildingCosts(SpaceCenterFacility facility)
@@ -269,7 +281,6 @@ namespace MonthlyBudgets
             int.TryParse(settings.GetValue("kerbalDeathPenalty"), out kerbalDeathPenalty);
             int.TryParse(settings.GetValue("vesselDeathPenalty"), out vesselDeathPenalty);
             bool.TryParse(settings.GetValue("useItOrLoseIt"), out useItOrLoseIt);
-            MonthlyBudgets.instance.BudgetAwarded(0, 0);
             upgraded = true;
             SpawnSettingsDialog();
         }

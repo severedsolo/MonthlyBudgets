@@ -66,3 +66,5 @@ obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 *.ide
 MonthlyBudgets/obj/Release/MonthlyBudgets.csproj.FileListAbsolute.txt
 MonthlyBudgets/bin/Release/PartDatabase.cfg
+MonthlyBudgets/bin/Release/GameData/KerbalChangeLog1-1-5/KerbalChangelog.version
+MonthlyBudgets/bin/Release/GameData/KerbalChangeLog1-1-5/KerbalChangelogChangelogv1-1-5.cfg

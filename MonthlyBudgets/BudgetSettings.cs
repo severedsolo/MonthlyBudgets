@@ -268,6 +268,7 @@ namespace MonthlyBudgets
             int.TryParse(settings.GetValue("otherFacilityCost"), out otherFacilityCost);
             int.TryParse(settings.GetValue("kerbalDeathPenalty"), out kerbalDeathPenalty);
             int.TryParse(settings.GetValue("vesselDeathPenalty"), out vesselDeathPenalty);
+            bool.TryParse(settings.GetValue("useItOrLoseIt"), out useItOrLoseIt);
             MonthlyBudgets.instance.BudgetAwarded(0, 0);
             upgraded = true;
             SpawnSettingsDialog();

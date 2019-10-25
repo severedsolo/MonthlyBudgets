@@ -52,6 +52,7 @@ namespace MonthlyBudgets
             savedNode.SetValue("kerbalDeathPenalty", BudgetSettings.instance.kerbalDeathPenalty, true);
             savedNode.SetValue("vesselDeathPenalty", BudgetSettings.instance.vesselDeathPenalty, true);
             savedNode.SetValue("upgraded", BudgetSettings.instance.upgraded, true);
+            savedNode.SetValue("useItOrLoseIt", BudgetSettings.instance.useItOrLoseIt, true);
         }
 
         public override void OnLoad(ConfigNode node)

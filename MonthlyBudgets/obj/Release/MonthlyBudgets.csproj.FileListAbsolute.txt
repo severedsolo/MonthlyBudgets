@@ -60,6 +60,5 @@ C:/Users/evilp/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/obj/Relea
 /home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/bin/Release/MonthlyBudgets.dll
 /home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/bin/Release/MonthlyBudgets.pdb
 /home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/obj/Release/MonthlyBudgets.csprojAssemblyReference.cache
-/home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/obj/Release/MonthlyBudgets.csproj.CoreCompileInputs.cache
 /home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/obj/Release/MonthlyBudgets.dll
 /home/martin/OneDrive/Documents/GitHub/MonthlyBudgets/MonthlyBudgets/obj/Release/MonthlyBudgets.pdb

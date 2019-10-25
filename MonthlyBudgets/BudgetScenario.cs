@@ -5,7 +5,7 @@ namespace MonthlyBudgets
 {
     // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
     [KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames,
-        GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER)]
+        GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER, GameScenes.EDITOR)]
     internal class BudgetScenario : ScenarioModule
     {
         private const string CurrentVersion = "4.11";

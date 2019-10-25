@@ -68,6 +68,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent></PostBuildEvent>
+    <PostBuildEvent>cp "$(TargetFileName)"  "/home/martin/.steam/steam/steamapps/common/Kerbal Space Program/GameData/MonthlyBudgets"</PostBuildEvent>
   </PropertyGroup>
 </Project>

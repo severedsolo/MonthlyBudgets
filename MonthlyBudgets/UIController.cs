@@ -9,12 +9,16 @@ namespace MonthlyBudgets
     internal class UiController : MonoBehaviour
     {
         private Rect _geometry = new Rect(0.5f, 0.5f, 300, 300);
+        private Rect _researchGeometry = new Rect(0.5f, 0.5f, 300, 100);
         private ApplicationLauncherButton _toolbarButton;
         private PopupDialog _uiDialog;
+        public PopupDialog ResearchDialog;
+        public static UiController instance;
 
         private void Awake()
         {
             DontDestroyOnLoad(this);
+            instance = this;
             GameEvents.onGUIApplicationLauncherReady.Add(GuiReady);
             GameEvents.onGameSceneSwitchRequested.Add(OnGameSceneSwitchRequested);
         }
@@ -41,7 +45,7 @@ namespace MonthlyBudgets
         {
             int costs = MonthlyBudgets.instance.CostCalculate(false);
             double estimatedBudget = Math.Round(Reputation.CurrentRep * BudgetSettings.instance.multiplier, 0);
-            if (estimatedBudget < costs) estimatedBudget = costs*2;
+            if (estimatedBudget < costs) estimatedBudget = costs * 2;
             if (gross) return "Estimated Gross Budget $:" + estimatedBudget;
             double netBudget = Math.Round(estimatedBudget - costs - MonthlyBudgets.instance.launchCosts, 0);
             return "Estimated Net Budget $:" + netBudget;
@@ -65,9 +69,9 @@ namespace MonthlyBudgets
                         "Launch Costs: $" + MonthlyBudgets.instance.launchCosts));
                 dialog.Add(new DialogGUILabel(() => EstimateBudget(false)));
                 dialog.Add(new DialogGUILabel(() =>
-                    "Research Budget: " + MonthlyBudgets.instance.researchBudget + "%"));
-                dialog.Add(new DialogGUISlider(() => MonthlyBudgets.instance.researchBudget, 0.0f, 100.0f, true, 140.0f,
-                    30.0f, newValue => { MonthlyBudgets.instance.researchBudget = newValue; }));
+                    "Research Budget: " + MonthlyBudgets.instance.ResearchBudget + "%"));
+                dialog.Add(new DialogGUISlider(() => MonthlyBudgets.instance.ResearchBudget, 0.0f, 100.0f, true, 140.0f,
+                    30.0f, newValue => { MonthlyBudgets.instance.ResearchBudget = newValue; }));
                 dialog.Add(new DialogGUIToggle(() => MonthlyBudgets.instance.enableEmergencyBudget,
                     "Enable Big Project Fund", b => { MonthlyBudgets.instance.enableEmergencyBudget = b; }));
                 dialog.Add(new DialogGUILabel(() => "Big Project Fund: $" + MonthlyBudgets.instance.emergencyBudget,
@@ -127,6 +131,17 @@ namespace MonthlyBudgets
         {
             GameEvents.onGUIApplicationLauncherReady.Remove(GuiReady);
             GameEvents.onGameSceneSwitchRequested.Remove(OnGameSceneSwitchRequested);
+        }
+
+        public PopupDialog ResearchBudgetWarning()
+        {
+            List<DialogGUIBase> dialog = new List<DialogGUIBase>();
+            dialog.Add(new DialogGUILabel(
+                "You have turned on the research budget. This will cause your reputation to decrease every month"));
+            dialog.Add(new DialogGUIButton("OK", () => { }, true));
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("ResearchWarningDIalog", "", "Monthly Budgets", UISkinManager.defaultSkin,
+                    _researchGeometry, dialog.ToArray()), true, UISkinManager.defaultSkin);
         }
     }
 }

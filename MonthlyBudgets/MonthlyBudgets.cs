@@ -26,9 +26,24 @@ namespace MonthlyBudgets
         public bool jokeSeen;
         public double lastUpdate;
         public int launchCosts;
-        public float researchBudget;
+        private float researchBudget;
         private bool _timeDiscrepancyLog = true;
         public double yearLength;
+        public bool researchWarning = false;
+
+        public float ResearchBudget
+        {
+            get => researchBudget;
+            set
+            {
+                if (researchWarning == false && researchBudget >0)
+                {
+                    UiController.instance.ResearchDialog = UiController.instance.ResearchBudgetWarning();
+                    researchWarning = true;
+                }
+                researchBudget = value;
+            } 
+        }
 
         private void Budget(double timeSinceLastUpdate)
         {

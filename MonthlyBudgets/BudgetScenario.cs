@@ -8,14 +8,15 @@ namespace MonthlyBudgets
         GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.SPACECENTER, GameScenes.EDITOR)]
     internal class BudgetScenario : ScenarioModule
     {
-        private const string CurrentVersion = "4.11";
-        private const string PreviousVersion = "4.8";
+        private const string CurrentVersion = "5.0.1";
+        private const string PreviousVersion = "4.11";
         private string _saveGameVersion = "0.0";
         private PopupDialog _errorDialog;
         private readonly Rect _geometry = new Rect(0.5f, 0.5f, 800, 30);
 
         public override void OnSave(ConfigNode savedNode)
         {
+            Debug.Log("[MonthlyBudgets]: OnSave");
             savedNode.SetValue("saveGameVersion", CurrentVersion, true);
             savedNode.SetValue("LastBudgetUpdate", MonthlyBudgets.instance.lastUpdate, true);
             savedNode.SetValue("EmergencyFund", MonthlyBudgets.instance.emergencyBudget, true);
@@ -34,7 +35,7 @@ namespace MonthlyBudgets
             savedNode.SetValue("AssignedWages", BudgetSettings.instance.assignedWages, true);
             savedNode.SetValue("VesselCost", BudgetSettings.instance.vesselCost, true);
             savedNode.SetValue("FirstRun", BudgetSettings.instance.firstRun, true);
-            savedNode.SetValue("RnD", MonthlyBudgets.instance.researchBudget, true);
+            savedNode.SetValue("RnD", MonthlyBudgets.instance.ResearchBudget, true);
             savedNode.SetValue("JokeSeen", MonthlyBudgets.instance.jokeSeen, true);
             savedNode.SetValue("BuildingCostsEnabled", BudgetSettings.instance.buildingCostsEnabled, true);
             savedNode.SetValue("sphCost", BudgetSettings.instance.sphCost, true);
@@ -53,14 +54,18 @@ namespace MonthlyBudgets
             savedNode.SetValue("vesselDeathPenalty", BudgetSettings.instance.vesselDeathPenalty, true);
             savedNode.SetValue("upgraded", BudgetSettings.instance.upgraded, true);
             savedNode.SetValue("useItOrLoseIt", BudgetSettings.instance.useItOrLoseIt, true);
+            savedNode.SetValue("researchWarning", MonthlyBudgets.instance.researchWarning, true);
+            Debug.Log("[MonthlyBudgets]: OnSaveComplete");
         }
 
         public override void OnLoad(ConfigNode node)
         {
             node.TryGetValue("saveGameVersion", ref _saveGameVersion);
+            Debug.Log("[MonthlyBudgets]: Save Game Version: "+_saveGameVersion+" - OnLoad");
             if (_saveGameVersion != CurrentVersion && _saveGameVersion != PreviousVersion && !BudgetSettings.instance.firstRun)
             {
                 SpawnErrorDialog();
+                Debug.Log("[MonthlyBudgets]: Save Upgrade Pipeline Failed");
                 return;
             }
             node.TryGetValue("LastBudgetUpdate", ref MonthlyBudgets.instance.lastUpdate);
@@ -80,7 +85,12 @@ namespace MonthlyBudgets
             node.TryGetValue("AssignedWages", ref BudgetSettings.instance.assignedWages);
             node.TryGetValue("VesselCost", ref BudgetSettings.instance.vesselCost);
             node.TryGetValue("FirstRun", ref BudgetSettings.instance.firstRun);
-            node.TryGetValue("RnD", ref MonthlyBudgets.instance.researchBudget);
+            if (_saveGameVersion == "5.0.1")
+            {
+                node.TryGetValue("researchWarning", ref MonthlyBudgets.instance.researchWarning);
+            }
+            float.TryParse(node.GetValue("RnD"), out float f);
+            MonthlyBudgets.instance.ResearchBudget = f;
             node.TryGetValue("JokeSeen", ref MonthlyBudgets.instance.jokeSeen);
             node.TryGetValue("BuildingCostsEnabled", ref BudgetSettings.instance.buildingCostsEnabled);
             node.TryGetValue("sphCost", ref BudgetSettings.instance.sphCost);
@@ -98,11 +108,8 @@ namespace MonthlyBudgets
             node.TryGetValue("LaunchCosts", ref MonthlyBudgets.instance.launchCosts);
             node.TryGetValue("kerbalDeathPenalty", ref BudgetSettings.instance.kerbalDeathPenalty);
             node.TryGetValue("vesselDeathPenalty", ref BudgetSettings.instance.vesselDeathPenalty);
-            if (_saveGameVersion == "4.11")
-            {
-                node.TryGetValue("useItOrLoseIt", ref BudgetSettings.instance.useItOrLoseIt);
-            }
-            if (BudgetSettings.instance.firstRun || !BudgetSettings.instance.upgraded)
+            node.TryGetValue("useItOrLoseIt", ref BudgetSettings.instance.useItOrLoseIt);
+                if (BudgetSettings.instance.firstRun || !BudgetSettings.instance.upgraded)
                 BudgetSettings.instance.FirstRun();
         }
 
